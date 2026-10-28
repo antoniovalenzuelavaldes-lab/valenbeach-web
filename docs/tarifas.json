@@ -1,0 +1,17 @@
+{
+  "_nota": "Datos extraidos de la web actual (Pinpoint) el 28/10/2026. PROVISIONAL: pendientes de confirmar por el titular.",
+  "moneda": "EUR",
+  "iva_incluido": null,
+  "limpieza_incluida": null,
+  "estancia_minima_noches": null,
+  "precio_base_noche": 200,
+  "temporadas": [
+    {"nombre": "Temporada baja", "precio": 150, "rangos": [], "_origen": "pagina 'El apartamento': 'desde 150 EUR/noche'; fechas pendientes"},
+    {"nombre": "Temporada alta", "precio": 200, "rangos": [], "_origen": "pagina 'El apartamento': 'desde 200 EUR/noche'; fechas pendientes"}
+  ],
+  "excepciones": {
+    "2026-10-29": 175,
+    "2026-10-30": 250
+  },
+  "_excepciones_origen": "Calendario de Pinpoint: solo hay precios definidos del 05/10/2026 al 08/11/2026 (200 EUR/noche, salvo estos dos dias, posiblemente de prueba)."
+}
