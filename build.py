@@ -50,7 +50,7 @@ T = {
     ("Dormitorios y baños", ["1 dormitorio con cama de matrimonio, aire acondicionado y baño en suite", "1 dormitorio con cama de matrimonio, aire acondicionado y ventilador", "1 dormitorio con cama de matrimonio y una cama adicional tipo litera", "1 dormitorio con 3 camas individuales (200 × 105 cm), aire acondicionado y ventilador", "Baño en suite con lavabo, ducha-bañera, bidé e inodoro", "Cuarto de baño con lavabo, ducha-bañera, bidé e inodoro"]),
     ("Exterior", ["Piscina comunitaria", "Jardín comunitario con césped y árboles", "Zona exterior para sentarse", "Plaza de parking privada"]),
     ("Más información", ["Playa más cercana: Las Dunas (a menos de 100 m)", "Aeropuerto más cercano: Málaga (a menos de 60 km)", "No se admiten mascotas", "Muy apto para familias con niños"]),
-    ("Incluido en el precio", ["Wifi", "Aspiradora, plancha y tabla de planchar", "Ropa de cama y toallas", "Entrada autónoma mediante llave electrónica", "Calefacción y aire acondicionado por bomba de calor"]),
+    ("Incluido en el precio", ["Wifi", "Aspiradora, plancha y tabla de planchar", "Ropa de cama y toallas", "Entrada autónoma mediante llave electrónica", "Calefacción y aire acondicionado por bomba de calor", "Limpieza final"]),
     ("Con suplemento", ["Cuna", "Late check-in / check-out", "Reserva de taxis"]),
     ("Deporte", ["Tenis (a menos de 1000 m)", "Golf (a menos de 10 km)"]),
   ],
@@ -69,10 +69,10 @@ T = {
   "dias": ["L", "M", "X", "J", "V", "S", "D"],
   "ocupado": "Ocupado", "libre": "Libre",
   "noche": "€/noche", "est": "Importe estimado de las noches: {t} € (a confirmar)", "estmsg": " Importe estimado: {t} €.",
-  "solo": "Calendario de ocupación pendiente de conectar: de momento se muestran solo los precios orientativos por noche.",
+  "min": "La estancia mínima es de {n} noches.", "solo": "Calendario de ocupación pendiente de conectar: de momento se muestran solo los precios orientativos por noche.",
   "tar_h": "Tarifas",
   "tar": [("Temporada baja", "desde 150 € por noche"), ("Temporada alta", "desde 200 € por noche")],
-  "tar_nota": "Precios orientativos por noche; el importe final depende de las fechas y del número de personas. Consúltalo por WhatsApp.",
+  "tar_nota": "Precios orientativos por noche; el importe final depende de las fechas y del número de personas. Consúltalo por WhatsApp. Estancia mínima: 2 noches. Limpieza final incluida en el precio.",
   "res_h": "Solicitar reserva",
   "res_p": "Dinos las fechas y cuántos sois, y te abrimos WhatsApp con el mensaje ya escrito. No hace falta registrarse y no se envía nada hasta que pulses «Enviar» en WhatsApp.",
   "f_in": "Entrada", "f_out": "Salida", "f_pers": "Personas", "f_btn": "Abrir WhatsApp",
@@ -124,7 +124,7 @@ T = {
     ("Bedrooms and bathrooms", ["1 bedroom with a double bed, air conditioning and en-suite bathroom", "1 bedroom with a double bed, air conditioning and a fan", "1 bedroom with a double bed and an extra bunk-style bed", "1 bedroom with 3 single beds (200 × 105 cm), air conditioning and a fan", "En-suite bathroom with washbasin, bath-shower, bidet and toilet", "Bathroom with washbasin, bath-shower, bidet and toilet"]),
     ("Outside", ["Shared swimming pool", "Shared garden with lawn and trees", "Outdoor seating area", "Private parking space"]),
     ("More information", ["Nearest beach: Las Dunas (less than 100 m)", "Nearest airport: Málaga (less than 60 km)", "No pets allowed", "Very suitable for families with children"]),
-    ("Included in the price", ["Wifi", "Vacuum cleaner, iron and ironing board", "Bed linen and towels", "Self check-in with an electronic key", "Heating and air conditioning by heat pump"]),
+    ("Included in the price", ["Wifi", "Vacuum cleaner, iron and ironing board", "Bed linen and towels", "Self check-in with an electronic key", "Heating and air conditioning by heat pump", "Final cleaning"]),
     ("Extra charge", ["Cot", "Late check-in / check-out", "Taxi booking"]),
     ("Sports", ["Tennis (less than 1000 m)", "Golf (less than 10 km)"]),
   ],
@@ -143,10 +143,10 @@ T = {
   "dias": ["M", "T", "W", "T", "F", "S", "S"],
   "ocupado": "Booked", "libre": "Available",
   "noche": "€/night", "est": "Estimated total for the nights: €{t} (to be confirmed)", "estmsg": " Estimated total: €{t}.",
-  "solo": "The occupancy calendar is not connected yet: for now only indicative nightly prices are shown.",
+  "min": "The minimum stay is {n} nights.", "solo": "The occupancy calendar is not connected yet: for now only indicative nightly prices are shown.",
   "tar_h": "Rates",
   "tar": [("Low season", "from €150 per night"), ("High season", "from €200 per night")],
-  "tar_nota": "Indicative prices per night; the final amount depends on dates and number of guests. Ask us on WhatsApp.",
+  "tar_nota": "Indicative prices per night; the final amount depends on dates and number of guests. Ask us on WhatsApp. Minimum stay: 2 nights. Final cleaning included in the price.",
   "res_h": "Request a booking",
   "res_p": "Tell us the dates and how many of you there are, and we open WhatsApp with the message already written. No registration needed and nothing is sent until you press “Send” in WhatsApp.",
   "f_in": "Check-in", "f_out": "Check-out", "f_pers": "Guests", "f_btn": "Open WhatsApp",
@@ -254,7 +254,7 @@ var f=document.getElementById('resform');
 var pT=fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
 if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
- function act(){var t=total(f.a.value,f.b.value);if(est)est.textContent=t==null?'':L.est.replace('{t}',t);}
+ function act(){var t=total(f.a.value,f.b.value),mn=T&&T.estancia_minima_noches,nn=0;if(f.a.value&&f.b.value)nn=Math.round((new Date(f.b.value)-new Date(f.a.value))/864e5);if(est)est.textContent=(mn&&nn>0&&nn<mn)?L.min.replace('{n}',mn):(t==null?'':L.est.replace('{t}',t));}
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
  f.addEventListener('submit',function(e){e.preventDefault();
   var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
@@ -315,7 +315,7 @@ def pie(t):
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
-         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"]}
+         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"], "min": t["min"]}
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
 
 

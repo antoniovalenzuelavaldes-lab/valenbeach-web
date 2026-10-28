@@ -1,13 +1,23 @@
 {
-  "_nota": "Datos extraidos de la web actual (Pinpoint) el 28/10/2026. PROVISIONAL: pendientes de confirmar por el titular.",
+  "_nota": "Datos extraidos de la web actual (Pinpoint) el 28/10/2026 y confirmados por el titular: limpieza incluida, estancia minima 2 noches, excepciones del 29-30/10 se mantienen. PENDIENTE: fechas de temporadas e IVA.",
   "moneda": "EUR",
   "iva_incluido": null,
-  "limpieza_incluida": null,
-  "estancia_minima_noches": null,
+  "limpieza_incluida": true,
+  "estancia_minima_noches": 2,
   "precio_base_noche": 200,
   "temporadas": [
-    {"nombre": "Temporada baja", "precio": 150, "rangos": [], "_origen": "pagina 'El apartamento': 'desde 150 EUR/noche'; fechas pendientes"},
-    {"nombre": "Temporada alta", "precio": 200, "rangos": [], "_origen": "pagina 'El apartamento': 'desde 200 EUR/noche'; fechas pendientes"}
+    {
+      "nombre": "Temporada baja",
+      "precio": 150,
+      "rangos": [],
+      "_origen": "pagina 'El apartamento': 'desde 150 EUR/noche'; fechas pendientes"
+    },
+    {
+      "nombre": "Temporada alta",
+      "precio": 200,
+      "rangos": [],
+      "_origen": "pagina 'El apartamento': 'desde 200 EUR/noche'; fechas pendientes"
+    }
   ],
   "excepciones": {
     "2026-10-29": 175,
