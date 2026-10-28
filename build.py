@@ -179,6 +179,9 @@ T = {
  },
 }
 
+# Poner a True cuando valenprojects.online este publicado (para no enlazar a una pagina inexistente).
+VALENPROJECTS_ACTIVA = False
+
 CSS = """
 :root{--bg:#fbfaf6;--fg:#1c2a33;--mut:#5a6a74;--acc:#0e6f9c;--acc2:#0a4f72;--sand:#efe7d6;--line:#dcd6c8;--card:#fff;--wa:#1f9d55}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10181d;--fg:#e8ecee;--mut:#9fb0ba;--acc:#6cc0e8;--acc2:#a5dcf5;--sand:#1c262c;--line:#2a3943;--card:#17222a;--wa:#35c076;color-scheme:dark}}
@@ -309,9 +312,18 @@ def cabecera(t, titulo, desc, ruta_rel, canon, alt, legal=False):
 <style>{CSS}</style></head><body class="{'legal' if legal else ''}"><header class="top"><div class="wrap"><a class="logo" href="{base or ''}/">{DATOS['nombre']}</a><nav>{nav}<a href="{t['otro']}" hreflang="{'en' if t['lang']=='es' else 'es'}" lang="{'en' if t['lang']=='es' else 'es'}">{t['otro_nombre']}</a></nav></div></header>"""
 
 
+def credito(t):
+    txt = "Web desarrollada por" if t["lang"] == "es" else "Website by"
+    nombre = "ValenProjects"
+    if VALENPROJECTS_ACTIVA:
+        nombre = '<a href="https://valenprojects.online" rel="noopener">ValenProjects</a>'
+    return f"✦ {txt} {nombre}"
+
+
 def pie(t):
     es = t["lang"] == "es"
     return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p>
+<p>{credito(t)}</p>
 <p><a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>"""
 
 
