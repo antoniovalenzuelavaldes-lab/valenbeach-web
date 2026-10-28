@@ -261,7 +261,7 @@ if(f){var est=document.getElementById('estimado');
  f.addEventListener('submit',function(e){e.preventDefault();
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
  var mb=document.getElementById('mailbtn');
- if(mb)mb.addEventListener('click',function(){location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje()+'\n\n');});
+ if(mb)mb.addEventListener('click',function(){location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje())+'%0A%0A';});
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
