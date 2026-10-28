@@ -482,4 +482,8 @@ if __name__ == "__main__":
     open(os.path.join(SITE, "robots.txt"), "w").write("User-agent: *\nAllow: /\nSitemap: https://valenbeach.com/sitemap.xml\n")
     urls = ["/", "/en/", "/el-apartamento/", "/en/el-apartamento/", "/aviso-legal-y-exencion-de-responsabilidad/", "/politica-de-privacidad/", "/condiciones/"]
     open(os.path.join(SITE, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://valenbeach.com{u}</loc></url>" for u in urls) + "</urlset>")
+    if not BASE:  # produccion: dominio propio y pagina 404
+        open(os.path.join(SITE, "CNAME"), "w").write("valenbeach.com\n")
+        p404 = legal("Página no encontrada", "<p>Esta página no existe o ha cambiado de sitio.</p><p><a href='/'>Volver al inicio</a> · <a href='/en/'>English</a></p>", "/404.html")
+        open(os.path.join(SITE, "404.html"), "w", encoding="utf8").write(p404)
     print("docs/ generado:", len(urls), "paginas")
