@@ -20,4 +20,7 @@ rangos.sort()
 ahora = datetime.datetime.now(datetime.timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
 dest = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datos", "disponibilidad.json")
 json.dump({"actualizado": ahora, "ocupado": rangos}, open(dest, "w", encoding="utf8"), ensure_ascii=False, indent=1)
+pub = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "disponibilidad.json")
+if os.path.isdir(os.path.dirname(pub)):  # copia publicada, para no tener que reconstruir toda la web
+    json.dump({"actualizado": ahora, "ocupado": rangos}, open(pub, "w", encoding="utf8"), ensure_ascii=False, indent=1)
 print(len(rangos), "rangos ocupados:", rangos)

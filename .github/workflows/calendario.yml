@@ -1,0 +1,45 @@
+name: Actualizar calendario de Booking
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # cada 3 horas
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  calendario:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Leer el calendario iCal de Booking (la URL es un secreto del repositorio)
+        env:
+          BOOKING_ICAL: ${{ secrets.BOOKING_ICAL }}
+        run: python herramientas/ical_a_json.py
+      - name: Publicar solo si hay cambios en las fechas
+        run: |
+          python - <<'PY'
+          import json,subprocess,sys,datetime
+          nuevo=json.load(open("docs/disponibilidad.json"))
+          try:
+              viejo=json.loads(subprocess.check_output(["git","show","HEAD:docs/disponibilidad.json"]))
+          except Exception:
+              viejo={}
+          # El día 1 de cada mes se hace commit aunque no cambien las fechas: GitHub desactiva los
+          # procesos programados tras 60 días sin actividad en el repositorio.
+          if viejo.get("ocupado")==nuevo["ocupado"] and datetime.date.today().day != 1:
+              # sin cambios de fechas: no se hace commit (la marca de hora se descarta)
+              subprocess.run(["git","checkout","--","docs/disponibilidad.json","datos/disponibilidad.json"])
+              print("sin cambios")
+          PY
+          if ! git diff --quiet; then
+            git config user.name "calendario-bot"
+            git config user.email "calendario-bot@users.noreply.github.com"
+            git add docs/disponibilidad.json datos/disponibilidad.json
+            git commit -m "Calendario: actualiza fechas ocupadas desde Booking"
+            git push
+          fi
