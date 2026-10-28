@@ -180,7 +180,7 @@ T = {
 }
 
 # Poner a True cuando valenprojects.online este publicado (para no enlazar a una pagina inexistente).
-VALENPROJECTS_ACTIVA = False
+VALENPROJECTS_ACTIVA = True
 
 CSS = """
 :root{--bg:#fbfaf6;--fg:#1c2a33;--mut:#5a6a74;--acc:#0e6f9c;--acc2:#0a4f72;--sand:#efe7d6;--line:#dcd6c8;--card:#fff;--wa:#1f9d55}
