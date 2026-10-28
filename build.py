@@ -390,7 +390,7 @@ PRIVACIDAD = f"""
 <h2>2. Qué datos tratamos y para qué</h2>
 <table><tr><th>Datos</th><th>Finalidad</th><th>Base jurídica</th></tr>
 <tr><td>Los que nos facilites al contactar (nombre, teléfono, correo, fechas y número de personas) por WhatsApp, teléfono o correo electrónico</td><td>Responder a tu consulta y gestionar tu solicitud de reserva</td><td>Medidas precontractuales a petición tuya (art. 6.1.b RGPD)</td></tr>
-<tr><td>Datos de los huéspedes que exige la normativa de registro de viajeros</td><td>Cumplir la obligación de registro documental e información a las autoridades</td><td>Obligación legal (art. 6.1.c)</td></tr>
+<tr><td>Datos de los huéspedes que exige la normativa de registro de viajeros (nombre, documento de identidad y matrícula del vehículo)</td><td>Cumplir la obligación de registro documental e información a las autoridades</td><td>Obligación legal (art. 6.1.c)</td></tr>
 <tr><td>Datos de pago y facturación, si los hay</td><td>Cobrar la estancia y cumplir las obligaciones fiscales</td><td>Ejecución del contrato y obligación legal (art. 6.1.b y 6.1.c)</td></tr></table>
 <p>Esta web <b>no tiene formularios que guarden datos</b>, no usa cookies de seguimiento ni cargas de servicios de terceros. El formulario de «Solicitar reserva» solo prepara un mensaje y abre WhatsApp en tu dispositivo: no recibimos nada hasta que tú lo envías por WhatsApp.</p>
 <h2>3. Destinatarios</h2>
@@ -402,6 +402,53 @@ PRIVACIDAD = f"""
 <h2>6. Cookies</h2>
 <p>Este sitio no instala cookies ni usa herramientas de analítica o publicidad. Por eso no muestra un aviso de cookies.</p>
 """
+
+CONDICIONES = f"""
+<p class="meta">Última actualización: {DATOS['fecha']}.</p>
+<p>Estas condiciones regulan el alquiler de corta estancia del apartamento <b>{DATOS['nombre']}</b>, en Torrox Costa (Málaga), con número de identificación oficial de alojamiento <b>{DATOS['registro']}</b>. Se complementan con el <a href="/aviso-legal-y-exencion-de-responsabilidad/">aviso legal</a> y la <a href="/politica-de-privacidad/">política de privacidad</a>.</p>
+<h2>1. Quién alquila</h2>
+<p>{DATOS['titular']}, NIF {DATOS['nif']}, con domicilio en {DATOS['domicilio']}. Contacto: <a href="mailto:{DATOS['email']}">{DATOS['email']}</a> · {DATOS['tel_vis']} (también por WhatsApp).</p>
+<h2>2. Solicitud y confirmación de la reserva</h2>
+<p>La solicitud se hace por WhatsApp, por correo electrónico o por teléfono. <b>La solicitud no es una reserva</b>: la reserva queda confirmada cuando el titular la acepta por escrito y se recibe la señal indicada abajo. La capacidad máxima del alojamiento es de <b>10 personas</b>. No se admiten mascotas.</p>
+<h2>3. Precio</h2>
+<ul><li>El precio es por noche y <b>lleva el IVA incluido</b>. Las tarifas vigentes figuran en la <a href="/#tarifas">página principal</a>.</li>
+<li>La <b>estancia mínima</b> es de 2 noches.</li>
+<li>La <b>limpieza final</b> está incluida en el precio, así como la ropa de cama, las toallas y el wifi.</li>
+<li>Se incluye un consumo eléctrico de <b>50 kWh por semana</b>.</li></ul>
+<h2>4. Señal y forma de pago</h2>
+<p>Para confirmar la reserva se abona una <b>señal de 50 €</b>, que se <b>descuenta del precio final</b>. El resto del precio se paga en la forma y fecha que se acuerden al confirmar la reserva. Los medios de pago se comunican al confirmar; no se publican en esta web.</p>
+<h2>5. Fianza</h2>
+<p>Antes de la entrada el huésped entrega una <b>fianza de 400 €</b> como garantía. Se devuelve <b>tras comprobar el estado del apartamento</b>, el día de la salida o, como máximo, en los 3 días siguientes. Se descontarán de la fianza, en su caso, los daños o los cargos adicionales del apartado 10.</p>
+<h2>6. Cancelación</h2>
+<p>La política de cancelación es <b>flexible</b>: se puede cancelar <b>hasta 1 semana (7 días) antes de la fecha de entrada</b>. Para cancelar basta con avisar por WhatsApp o por correo. Si se cancela dentro de esa semana, se estará a lo acordado al confirmar la reserva.</p>
+<h2>7. Derecho de desistimiento</h2>
+<p>Al tratarse de un servicio de alojamiento con una fecha de ejecución específica, <b>no se aplica el derecho legal de desistimiento de 14 días</b> (artículo 103.l del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios). Rige la política de cancelación del apartado 6.</p>
+<h2>8. Entrada y salida</h2>
+<ul><li><b>Entrada</b>: de 16:00 a 21:00 el día de llegada. Una entrada anterior o posterior debe consultarse y puede tener un coste extra.</li>
+<li><b>Salida</b>: como máximo a las 11:00 del día de salida. Una salida posterior debe consultarse y puede tener un coste extra.</li>
+<li>El acceso es autónomo: las instrucciones de llegada se envían al huésped tras confirmar la reserva.</li>
+<li>Al salir, el huésped deja el apartamento cerrado y las llaves dentro, y avisa por WhatsApp.</li></ul>
+<h2>9. Datos de los huéspedes</h2>
+<p>Antes de la llegada el huésped debe enviar el <b>nombre y el documento de identidad de todos los ocupantes</b>, así como la <b>matrícula del vehículo</b> que use la plaza de aparcamiento. Es una obligación legal de registro de viajeros; consulta la <a href="/politica-de-privacidad/">política de privacidad</a>.</p>
+<h2>10. Cargos adicionales</h2>
+<ul><li><b>Electricidad</b>: el consumo superior a 50 kWh por semana se factura a <b>0,45 € por kWh</b>. El contador se puede consultar junto a la puerta de entrada.</li>
+<li><b>Entrada o salida fuera de horario</b>: a consultar.</li>
+<li><b>Cuna</b>: 1 € por día.</li>
+<li><b>Pérdida de llaves</b>: la llave física es anticopia y su pérdida obliga a cambiar la cerradura completa (<b>150 €</b>). La pérdida de una llave magnética cuesta <b>20 €</b>.</li>
+<li>Servicios adicionales, con precio y disponibilidad a consultar: alquiler de bicicletas y de sombrilla y sillas de playa.</li></ul>
+<h2>11. Normas de uso</h2>
+<ul><li>No está permitido <b>fumar</b> en el apartamento.</li>
+<li>Las <b>fiestas están estrictamente prohibidas</b> en la comunidad. Si una cena se prolonga más allá de medianoche, debe continuar en el interior del apartamento.</li>
+<li>La basura se deposita en el contenedor, fuera de la urbanización, antes de la salida.</li>
+<li>Las <b>normas de la comunidad</b> de propietarios son de obligado cumplimiento; se entregan al huésped.</li>
+<li>El aire acondicionado debe usarse con moderación y solo cuando se está en casa.</li>
+<li>Los juegos de toallas son de interior y no se pueden usar en la playa.</li></ul>
+<h2>12. Responsabilidad del huésped</h2>
+<p>El huésped responde de los daños que cause en el apartamento, el mobiliario o las zonas comunes, y del incumplimiento de las normas de la comunidad. El titular podrá resolver la estancia si se incumplen gravemente las normas de uso.</p>
+<h2>13. Ley aplicable y reclamaciones</h2>
+<p>Legislación española. Para cualquier reclamación, escribe a {DATOS['email']}. Si eres consumidor, son competentes los tribunales de tu domicilio.</p>
+"""
+
 
 if __name__ == "__main__":
     os.makedirs(SITE, exist_ok=True)
@@ -424,12 +471,7 @@ if __name__ == "__main__":
     w("/en/el-apartamento/", pagina_apto(T["en"]))
     w("/aviso-legal-y-exencion-de-responsabilidad/", legal("Aviso legal", AVISO, "/aviso-legal-y-exencion-de-responsabilidad/"))
     w("/politica-de-privacidad/", legal("Política de privacidad", PRIVACIDAD, "/politica-de-privacidad/"))
-    # Condiciones: texto original del titular, conservado tal cual para su revision
-    orig = open(os.path.join(ORIGEN, "condiciones.txt"), encoding="utf8").read().split("\n")
-    cuerpo = ""
-    for ln in orig[2:]:
-        cuerpo += ("<h2>" + e(ln) + "</h2>") if (len(ln) < 60 and not ln.endswith(".")) else ("<p>" + e(ln) + "</p>")
-    w("/condiciones/", legal("Condiciones generales de reserva", "<p class='meta'>Texto conservado de la web anterior; pendiente de revisión.</p>" + cuerpo, "/condiciones/"))
+    w("/condiciones/", legal("Condiciones generales de reserva", CONDICIONES, "/condiciones/"))
     import shutil
     shutil.copy(os.path.join(AQUI, "datos", "tarifas.json"), os.path.join(SITE, "tarifas.json"))
     dd = os.path.join(AQUI, "datos", "disponibilidad.json")
