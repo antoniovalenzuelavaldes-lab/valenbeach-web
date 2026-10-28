@@ -68,11 +68,11 @@ T = {
   "meses": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
   "dias": ["L", "M", "X", "J", "V", "S", "D"],
   "ocupado": "Ocupado", "libre": "Libre",
-  "noche": "€/noche", "est": "Importe estimado de las noches: {t} € (a confirmar)", "estmsg": " Importe estimado: {t} €.",
+  "noche": "€/noche", "est": "Importe estimado de las noches: {t} € (IVA incluido, a confirmar)", "estmsg": " Importe estimado: {t} €.",
   "min": "La estancia mínima es de {n} noches.", "solo": "Calendario de ocupación pendiente de conectar: de momento se muestran solo los precios orientativos por noche.",
   "tar_h": "Tarifas",
-  "tar": [("Temporada baja", "desde 150 € por noche"), ("Temporada alta", "desde 200 € por noche")],
-  "tar_nota": "Precios orientativos por noche; el importe final depende de las fechas y del número de personas. Consúltalo por WhatsApp. Estancia mínima: 2 noches. Limpieza final incluida en el precio.",
+  "tar": [("Temporada alta (julio)", "450 € por noche"), ("Resto del año", "desde 150 € por noche")],
+  "tar_nota": "Precios orientativos por noche; el importe final depende de las fechas y del número de personas. Consúltalo por WhatsApp. Precios con IVA incluido. Estancia mínima: 2 noches. Limpieza final incluida en el precio.",
   "res_h": "Solicitar reserva",
   "res_p": "Dinos las fechas y cuántos sois, y te abrimos WhatsApp con el mensaje ya escrito. No hace falta registrarse y no se envía nada hasta que pulses «Enviar» en WhatsApp.",
   "f_in": "Entrada", "f_out": "Salida", "f_pers": "Personas", "f_btn": "Abrir WhatsApp",
@@ -142,11 +142,11 @@ T = {
   "meses": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   "dias": ["M", "T", "W", "T", "F", "S", "S"],
   "ocupado": "Booked", "libre": "Available",
-  "noche": "€/night", "est": "Estimated total for the nights: €{t} (to be confirmed)", "estmsg": " Estimated total: €{t}.",
+  "noche": "€/night", "est": "Estimated total for the nights: €{t} (VAT included, to be confirmed)", "estmsg": " Estimated total: €{t}.",
   "min": "The minimum stay is {n} nights.", "solo": "The occupancy calendar is not connected yet: for now only indicative nightly prices are shown.",
   "tar_h": "Rates",
-  "tar": [("Low season", "from €150 per night"), ("High season", "from €200 per night")],
-  "tar_nota": "Indicative prices per night; the final amount depends on dates and number of guests. Ask us on WhatsApp. Minimum stay: 2 nights. Final cleaning included in the price.",
+  "tar": [("High season (July)", "€450 per night"), ("Rest of the year", "from €150 per night")],
+  "tar_nota": "Indicative prices per night; the final amount depends on dates and number of guests. Ask us on WhatsApp. Prices include VAT. Minimum stay: 2 nights. Final cleaning included in the price.",
   "res_h": "Request a booking",
   "res_p": "Tell us the dates and how many of you there are, and we open WhatsApp with the message already written. No registration needed and nothing is sent until you press “Send” in WhatsApp.",
   "f_in": "Check-in", "f_out": "Check-out", "f_pers": "Guests", "f_btn": "Open WhatsApp",
@@ -409,7 +409,7 @@ if __name__ == "__main__":
         os.makedirs(os.path.dirname(p), exist_ok=True)
         if BASE:
             import re
-            contenido = re.sub(r'(href|src)="/(?!/)', r'="' + BASE + '/', contenido)
+            contenido = re.sub(r'(href|src)="/(?!/)', lambda m: m.group(1) + '="' + BASE + '/', contenido)
             contenido = contenido.replace("url(/img/", "url(" + BASE + "/img/").replace("fetch('/disponibilidad.json'", "fetch('" + BASE + "/disponibilidad.json'")
             contenido = contenido.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">', 1)
             contenido = contenido.replace(DATOS["nif"], "[oculto en la versión de prueba]").replace(DATOS["domicilio"], "Carretera de Almería 23b, 29770 Torrox (Málaga)")

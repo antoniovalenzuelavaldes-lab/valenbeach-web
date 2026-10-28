@@ -1,7 +1,7 @@
 {
-  "_nota": "Datos extraidos de la web actual (Pinpoint) el 28/10/2026 y confirmados por el titular: limpieza incluida, estancia minima 2 noches, excepciones del 29-30/10 se mantienen. PENDIENTE: fechas de temporadas e IVA.",
+  "_nota": "Datos de la web antigua (Pinpoint) y confirmaciones del titular (28/10/2026): limpieza incluida, estancia minima 2 noches, temporada alta = julio a 450 EUR/noche. PENDIENTE: precio y fechas de la temporada baja (hoy el calendario usa 200 EUR/noche fuera de julio). IVA incluido en los precios (confirmado por el titular).",
   "moneda": "EUR",
-  "iva_incluido": null,
+  "iva_incluido": true,
   "limpieza_incluida": true,
   "estancia_minima_noches": 2,
   "precio_base_noche": 200,
@@ -14,9 +14,14 @@
     },
     {
       "nombre": "Temporada alta",
-      "precio": 200,
-      "rangos": [],
-      "_origen": "pagina 'El apartamento': 'desde 200 EUR/noche'; fechas pendientes"
+      "precio": 450,
+      "rangos": [
+        [
+          "07-01",
+          "07-31"
+        ]
+      ],
+      "_origen": "Indicado por el titular el 28/10/2026: temporada alta = julio, 450 EUR/noche"
     }
   ],
   "excepciones": {
