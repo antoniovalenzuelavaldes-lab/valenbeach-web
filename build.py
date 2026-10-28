@@ -68,7 +68,7 @@ T = {
   "meses": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
   "dias": ["L", "M", "X", "J", "V", "S", "D"],
   "ocupado": "Ocupado", "libre": "Libre",
-  "noche": "€/noche", "est": "Importe estimado de las noches: {t} € (IVA incluido, a confirmar)", "estmsg": " Importe estimado: {t} €.",
+  "noche": "€/noche", "f_mail": "Enviar por correo", "subj": "Solicitud de reserva en Valen Beach", "mail_nota": "¿No usas WhatsApp? Escríbenos a", "est": "Importe estimado de las noches: {t} € (IVA incluido, a confirmar)", "estmsg": " Importe estimado: {t} €.",
   "min": "La estancia mínima es de {n} noches.", "solo": "Calendario de ocupación pendiente de conectar: de momento se muestran solo los precios orientativos por noche.",
   "tar_h": "Tarifas",
   "tar": [("Temporada alta (julio)", "450 € por noche"), ("Resto del año", "desde 200 € por noche")],
@@ -142,7 +142,7 @@ T = {
   "meses": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   "dias": ["M", "T", "W", "T", "F", "S", "S"],
   "ocupado": "Booked", "libre": "Available",
-  "noche": "€/night", "est": "Estimated total for the nights: €{t} (VAT included, to be confirmed)", "estmsg": " Estimated total: €{t}.",
+  "noche": "€/night", "f_mail": "Send by email", "subj": "Booking request at Valen Beach", "mail_nota": "Don't use WhatsApp? Write to us at", "est": "Estimated total for the nights: €{t} (VAT included, to be confirmed)", "estmsg": " Estimated total: €{t}.",
   "min": "The minimum stay is {n} nights.", "solo": "The occupancy calendar is not connected yet: for now only indicative nightly prices are shown.",
   "tar_h": "Rates",
   "tar": [("High season (July)", "€450 per night"), ("Rest of the year", "from €200 per night")],
@@ -256,10 +256,12 @@ if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
  function act(){var t=total(f.a.value,f.b.value),mn=T&&T.estancia_minima_noches,nn=0;if(f.a.value&&f.b.value)nn=Math.round((new Date(f.b.value)-new Date(f.a.value))/864e5);if(est)est.textContent=(mn&&nn>0&&nn<mn)?L.min.replace('{n}',mn):(t==null?'':L.est.replace('{t}',t));}
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
+ function mensaje(){var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
+  if(t!=null)m+=L.estmsg.replace('{t}',t);return m;}
  f.addEventListener('submit',function(e){e.preventDefault();
-  var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
-  if(t!=null)m+=L.estmsg.replace('{t}',t);
-  window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(m),'_blank','noopener');});
+  window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
+ var mb=document.getElementById('mailbtn');
+ if(mb)mb.addEventListener('click',function(){location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje()+'\n\n');});
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
@@ -315,7 +317,7 @@ def pie(t):
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
-         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"], "min": t["min"]}
+         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"], "min": t["min"]}
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
 
 
@@ -338,7 +340,7 @@ def pagina_inicio(t):
 <section id="disponibilidad"><h2>{e(t['disp_h'])}</h2><div id="cal" class="meta">…</div><p class="meta" id="calnota">{e(t['disp_nota'])}</p></section>
 <section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta">{e(t['tar_nota'])}</p></section>
 <section id="reservar"><h2>{e(t['res_h'])}</h2><p>{e(t['res_p'])}</p>
-<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button></form><p class="meta" id="estimado"></p></section></main>
+<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
 <section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section></main>"""
