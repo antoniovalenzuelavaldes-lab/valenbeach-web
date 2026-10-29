@@ -16,8 +16,8 @@ DATOS = {
     "tel_vis": "(+34) 615 174 997",
     "tel_wa": "34615174997",
     "registro": "AT-434842-A",
-    "fecha": "28 de octubre de 2026",
-    "date_en": "28 October 2026",
+    "fecha": "29 de octubre de 2026",
+    "date_en": "29 October 2026",
     "dominio": "https://valenbeach.com",
 }
 
@@ -179,6 +179,15 @@ T = {
  },
 }
 
+from i18n_extra import EXTRA, NUEVOS
+for _k, _v in EXTRA.items():
+    T[_k].update(_v)
+T.update(NUEVOS)
+LANGS = [("es", "Español", "ES"), ("en", "English", "EN"), ("de", "Deutsch", "DE"), ("fr", "Français", "FR"), ("nl", "Nederlands", "NL")]
+RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/"}
+RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
+GOATCOUNTER = "valenbeach"   # cuenta de GoatCounter (estadisticas sin cookies); crearla en goatcounter.com con este codigo
+
 # Poner a True cuando valenprojects.online este publicado (para no enlazar a una pagina inexistente).
 VALENPROJECTS_ACTIVA = True
 
@@ -194,6 +203,8 @@ header.top .wrap{display:flex;gap:14px;align-items:center;justify-content:space-
 .logo{font:600 1.15rem Georgia,'Times New Roman',serif;letter-spacing:.03em;color:var(--fg);text-decoration:none}
 nav{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em}
 nav a{color:var(--mut);text-decoration:none;padding:4px 0}nav a:hover{color:var(--acc)}
+.langs{display:inline-flex;gap:8px;margin-left:6px;padding-left:12px;border-left:1px solid var(--line)}.langs a[aria-current]{color:var(--fg);font-weight:700}
+.faq h3{text-transform:none;letter-spacing:0;font-size:1.05rem;color:var(--fg);margin:1.2em 0 .2em}.faq p{margin:.1em 0}
 .hero{position:relative;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));min-height:min(62vh,540px);display:grid;place-items:center;text-align:center;color:#fff;background:#0a3a52 url(/img/hero.jpg) center 55%/cover no-repeat}
 .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,30,45,.35),rgba(5,30,45,.5))}
 .hero>div{position:relative;padding:40px 16px}
@@ -261,10 +272,11 @@ if(f){var est=document.getElementById('estimado');
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
  function mensaje(){var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
   if(t!=null)m+=L.estmsg.replace('{t}',t);return m;}
- f.addEventListener('submit',function(e){e.preventDefault();
+ function ev(n){try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:n,title:n,event:true})}catch(x){}}
+ f.addEventListener('submit',function(e){e.preventDefault();ev('reserva-whatsapp');
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
  var mb=document.getElementById('mailbtn');
- if(mb)mb.addEventListener('click',function(){location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje())+'%0A%0A';});
+ if(mb)mb.addEventListener('click',function(){ev('reserva-email');location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje())+'%0A%0A';});
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
@@ -302,14 +314,22 @@ def lista(items):
     return "<ul class='ticks'>" + "".join(f"<li>{e(i)}</li>" for i in items) + "</ul>"
 
 
-def cabecera(t, titulo, desc, ruta_rel, canon, alt, legal=False):
+def cabecera(t, titulo, desc, ruta_rel, canon, alt, legal=False, hero=False):
     base = t["base"]
-    nav = "".join(f'<a href="{(base + "/" if base else "/") + h if not h.startswith("#") else (base + "/" if base else "/") + h}">{e(n)}</a>' for h, n in t["nav"])
+    D = DATOS["dominio"]
+    nav = "".join(f'<a href="{(base + "/" if base else "/") + h}">{e(n)}</a>' for h, n in t["nav"])
+    hl = "".join(f'<link rel="alternate" hreflang="{l}" href="{D}{u}">' for l, u in alt.items())
+    hl += f'<link rel="alternate" hreflang="x-default" href="{D}{alt.get("en") or alt.get("es")}">'
+    sw = "".join(f'<a href="{alt.get(l, RUTAS_INICIO[l])}" hreflang="{l}" lang="{l}" title="{e(n)}"{" aria-current=true" if l == t["lang"] else ""}>{c}</a>' for l, n, c in LANGS)
+    pre = '<link rel="preload" as="image" href="/img/hero.jpg" fetchpriority="high">' if hero else ""
+    loc = t.get("og_locale", "es_ES")
     return f"""<!doctype html><html lang="{t['lang']}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{e(titulo)}</title><meta name="description" content="{e(desc)}">
-<link rel="canonical" href="{DATOS['dominio']}{canon}"><link rel="alternate" hreflang="es" href="{DATOS['dominio']}{alt['es']}"><link rel="alternate" hreflang="en" href="{DATOS['dominio']}{alt['en']}"><link rel="alternate" hreflang="x-default" href="{DATOS['dominio']}{alt['es']}">
-<meta property="og:title" content="{e(titulo)}"><meta property="og:description" content="{e(desc)}"><meta property="og:image" content="{DATOS['dominio']}/img/hero.jpg"><meta property="og:type" content="website">
-<style>{CSS}</style></head><body class="{'legal' if legal else ''}"><header class="top"><div class="wrap"><a class="logo" href="{base or ''}/">{DATOS['nombre']}</a><nav>{nav}<a href="{t['otro']}" hreflang="{'en' if t['lang']=='es' else 'es'}" lang="{'en' if t['lang']=='es' else 'es'}">{t['otro_nombre']}</a></nav></div></header>"""
+<link rel="canonical" href="{D}{canon}">{hl}
+<meta property="og:title" content="{e(titulo)}"><meta property="og:description" content="{e(desc)}"><meta property="og:image" content="{D}/img/hero.jpg"><meta property="og:type" content="website"><meta property="og:url" content="{D}{canon}"><meta property="og:site_name" content="{DATOS['nombre']}"><meta property="og:locale" content="{loc}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(titulo)}"><meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{D}/img/hero.jpg">
+<meta name="theme-color" content="#0e6f9c">{pre}
+<style>{CSS}</style></head><body class="{'legal' if legal else ''}"><header class="top"><div class="wrap"><a class="logo" href="{base or ''}/">{DATOS['nombre']}</a><nav>{nav}<span class="langs" aria-label="Language">{sw}</span></nav></div></header>"""
 
 
 def credito(t):
@@ -320,17 +340,38 @@ def credito(t):
     return f"✦ {txt} {nombre}"
 
 
+def estadisticas():
+    """GoatCounter: visitas sin cookies, sin guardar la IP y sin activarse si el navegador indica «no rastrear»."""
+    if not GOATCOUNTER:
+        return ""
+    return ("<script>if(navigator.doNotTrack!=='1'&&!navigator.globalPrivacyControl){var s=document.createElement('script');s.async=1;s.src='/count.js';"
+            f"s.setAttribute('data-goatcounter','https://{GOATCOUNTER}.goatcounter.com/count');document.head.appendChild(s)}}</script>")
+
+
 def pie(t):
     es = t["lang"] == "es"
     return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p>
 <p>{credito(t)}</p>
-<p><a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>"""
+<p><a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
 
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
          "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"], "min": t["min"]}
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
+
+
+def ld_json(t):
+    """Datos estructurados (schema.org VacationRental) con la informacion que ya figura en la web: nada inventado."""
+    D = DATOS["dominio"]
+    d = {"@context": "https://schema.org", "@type": "VacationRental", "name": DATOS["nombre"], "url": D + RUTAS_INICIO[t["lang"]], "inLanguage": t["lang"],
+         "description": t["meta"], "image": [f"{D}/img/{f}" for f, _ in t["fotos"][:6]], "identifier": DATOS["registro"],
+         "telephone": "+" + DATOS["tel_wa"], "email": DATOS["email"], "petsAllowed": False, "checkinTime": "16:00", "checkoutTime": "11:00",
+         "address": {"@type": "PostalAddress", "streetAddress": "Carretera de Almería 23b (Urbanización Duna Beach 2)", "addressLocality": "Torrox Costa", "addressRegion": "Málaga", "postalCode": "29770", "addressCountry": "ES"},
+         "containsPlace": {"@type": "Accommodation", "additionalType": "EntirePlace", "occupancy": {"@type": "QuantitativeValue", "value": 10}, "numberOfBedrooms": 4, "numberOfBathroomsTotal": 2,
+                           "amenityFeature": [{"@type": "LocationFeatureSpecification", "name": n, "value": True} for n in t["com"][:12]]}}
+    faq = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in t["faq"]]}
+    return "".join('<script type="application/ld+json">' + json.dumps(x, ensure_ascii=False).replace("</", "<\\/") + "</script>" for x in (d, faq))
 
 
 def pagina_inicio(t):
@@ -341,8 +382,8 @@ def pagina_inicio(t):
     tar = "".join(f'<div class="card"><h3 style="margin-top:0">{e(a)}</h3><b>{e(b)}</b></div>' for a, b in t["tar"])
     ops = "".join(f'<div class="card"><p>{e(x)}</p><small>{e(a)} · {b}</small></div>' for a, b, x in t["opiniones"])
     es = t["lang"] == "es"
-    alt = {"es": "/", "en": "/en/"}
-    h = cabecera(t, t["title"], t["meta"], "", "/" if es else "/en/", alt)
+    alt = dict(RUTAS_INICIO)
+    h = cabecera(t, t["title"], t["meta"], "", alt[t["lang"]], alt, hero=True)
     h += f"""<div class="hero"><div><div class="eyebrow">{e(t['eyebrow'])}</div><h1>{t['h1']}</h1><a class="btn" href="#reservar">{e(t['cta'])}</a></div></div>
 <main class="wrap"><section id="inicio"><div class="cols"><div><h2>{e(t['intro_h'])}</h2>{''.join(f'<p>{e(p)}</p>' for p in t['intro'])}</div>
 <div class="card"><h3 style="margin-top:0">{e(DATOS['nombre'])}</h3><p style="margin:.2em 0 1em">{e(DATOS['domicilio'])}</p><h3>{e(t['contacto_h'])}</h3><p style="margin:.2em 0">{t['disp']}<br><a href="tel:+{DATOS['tel_wa']}">{DATOS['tel_vis']}</a><br><a href="mailto:{DATOS['email']}">{DATOS['email']}</a><br><a href="{wa}" rel="noopener" target="_blank">WhatsApp</a></p></div></div></section>
@@ -355,16 +396,17 @@ def pagina_inicio(t):
 <form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
-<section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section></main>"""
-    h += pie(t) + script(t) + "</body></html>"
+<section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section>
+<section id="faq" class="faq"><h2>{e(t['faq_h'])}</h2>{''.join(f'<h3>{e(q)}</h3><p>{e(a)}</p>' for q, a in t['faq'])}</section></main>"""
+    h += ld_json(t) + pie(t) + script(t) + "</body></html>"
     return h
 
 
 def pagina_apto(t):
     es = t["lang"] == "es"
     base = t["base"]
-    alt = {"es": "/el-apartamento/", "en": "/en/el-apartamento/"}
-    h = cabecera(t, t["ap_title"], t["ap_desc"], "", alt["es"] if es else alt["en"], alt)
+    alt = dict(RUTAS_APTO)
+    h = cabecera(t, t["ap_title"], t["ap_desc"], "", alt[t["lang"]], alt)
     items = "".join(f"<h3>{e(a)}</h3><p>{e(b)}</p>" for a, b in t["ap"])
     fotos = "".join(f'<figure><img src="/img/{f}" alt="{e(c)}" loading="lazy" width="1600" height="1200"><figcaption>{e(c)}</figcaption></figure>' for f, c in t["fotos"])
     h += f"""<main class="wrap" style="padding-top:36px"><p><a href="{base or ''}/">{t['volver']}</a></p><h1 style="font-size:2.4rem;color:var(--fg)">{e(t['ap_h'])}</h1><div class="cols"><div>{items}</div><div class="card"><h3 style="margin-top:0">{e(t['tar_h'])}</h3>{''.join(f'<p style="margin:.3em 0"><b>{e(a)}</b>: {e(b)}</p>' for a, b in t['tar'])}<p class="meta">{e(t['tar_nota'])}</p><p><a class="btn" href="https://wa.me/{DATOS['tel_wa']}?text={__import__('urllib.parse', fromlist=['quote']).quote(t['wa_msg'])}" target="_blank" rel="noopener">{e(t['cta'])}</a></p></div></div><section><div class="gal">{fotos}</div></section></main>"""
@@ -374,7 +416,7 @@ def pagina_apto(t):
 
 def legal(titulo, cuerpo, ruta):
     t = T["es"]
-    alt = {"es": ruta, "en": ruta}
+    alt = {"es": ruta}
     h = cabecera(t, f"{titulo} · {DATOS['nombre']}", titulo, "", ruta, alt, legal=True)
     h += f"<main><h1>{e(titulo)}</h1>{cuerpo}</main>" + pie(t) + "</body></html>"
     return h
@@ -403,16 +445,17 @@ PRIVACIDAD = f"""
 <table><tr><th>Datos</th><th>Finalidad</th><th>Base jurídica</th></tr>
 <tr><td>Los que nos facilites al contactar (nombre, teléfono, correo, fechas y número de personas) por WhatsApp, teléfono o correo electrónico</td><td>Responder a tu consulta y gestionar tu solicitud de reserva</td><td>Medidas precontractuales a petición tuya (art. 6.1.b RGPD)</td></tr>
 <tr><td>Datos de los huéspedes que exige la normativa de registro de viajeros (nombre, documento de identidad y matrícula del vehículo)</td><td>Cumplir la obligación de registro documental e información a las autoridades</td><td>Obligación legal (art. 6.1.c)</td></tr>
-<tr><td>Datos de pago y facturación, si los hay</td><td>Cobrar la estancia y cumplir las obligaciones fiscales</td><td>Ejecución del contrato y obligación legal (art. 6.1.b y 6.1.c)</td></tr></table>
-<p>Esta web <b>no tiene formularios que guarden datos</b>, no usa cookies de seguimiento ni cargas de servicios de terceros. El formulario de «Solicitar reserva» solo prepara un mensaje y abre WhatsApp en tu dispositivo: no recibimos nada hasta que tú lo envías por WhatsApp.</p>
+<tr><td>Datos de pago y facturación, si los hay</td><td>Cobrar la estancia y cumplir las obligaciones fiscales</td><td>Ejecución del contrato y obligación legal (art. 6.1.b y 6.1.c)</td></tr><tr><td>Datos técnicos de la visita (página, web de origen, país, navegador y tamaño de pantalla), sin IP ni cookies</td><td>Medir el uso de la web para mejorarla</td><td>Interés legítimo (art. 6.1.f RGPD)</td></tr></table>
+<p>Esta web <b>no tiene formularios que guarden datos</b> y <b>no usa cookies</b>. Para saber cuánta gente la visita usamos <b>GoatCounter</b>, un servicio de estadísticas sin cookies que no guarda tu dirección IP ni te identifica, y que no se activa si tu navegador indica «no rastrear». El formulario de «Solicitar reserva» solo prepara un mensaje y abre WhatsApp en tu dispositivo: no recibimos nada hasta que tú lo envías por WhatsApp.</p>
 <h2>3. Destinatarios</h2>
 <p>No cedemos tus datos a terceros salvo obligación legal (por ejemplo, a las administraciones competentes en materia de registro de viajeros o tributaria). Usamos WhatsApp (Meta) como canal de comunicación si tú nos escribes por ese medio, y el proveedor de alojamiento web para servir esta página, que puede registrar tu dirección IP por motivos técnicos y de seguridad.</p>
+<p>Para las estadísticas de visitas usamos GoatCounter, que no recibe tu correo ni ningún dato que nos facilites por WhatsApp o correo electrónico.</p>
 <h2>4. Conservación</h2>
 <p>Conservamos las conversaciones y los datos de la solicitud el tiempo necesario para atenderla y, si hay reserva, durante los plazos que exijan las normas de registro, fiscales y mercantiles.</p>
 <h2>5. Tus derechos</h2>
 <p>Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a {DATOS['email']}. Si consideras que tus datos no se tratan correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es">www.aepd.es</a>).</p>
 <h2>6. Cookies</h2>
-<p>Este sitio no instala cookies ni usa herramientas de analítica o publicidad. Por eso no muestra un aviso de cookies.</p>
+<p>Este sitio no instala cookies. Las visitas se miden con GoatCounter, sin cookies, sin publicidad y sin guardar la dirección IP; por eso no muestra un aviso de cookies. Si tu navegador indica «no rastrear», ni siquiera se cuenta tu visita.</p>
 """
 
 CONDICIONES = f"""
@@ -477,10 +520,9 @@ if __name__ == "__main__":
             contenido = contenido.replace("</header>", '</header><div style="background:#fff4d6;color:#4a3b00;border-bottom:1px solid #e0b94a;padding:8px 16px;text-align:center;font-size:.9rem">Versión de prueba: precios y calendario provisionales; datos fiscales ocultos.</div>', 1)
         open(p, "w", encoding="utf8").write(contenido)
 
-    w("/", pagina_inicio(T["es"]))
-    w("/en/", pagina_inicio(T["en"]))
-    w("/el-apartamento/", pagina_apto(T["es"]))
-    w("/en/el-apartamento/", pagina_apto(T["en"]))
+    for _l, _, _ in LANGS:
+        w(RUTAS_INICIO[_l], pagina_inicio(T[_l]))
+        w(RUTAS_APTO[_l], pagina_apto(T[_l]))
     w("/aviso-legal-y-exencion-de-responsabilidad/", legal("Aviso legal", AVISO, "/aviso-legal-y-exencion-de-responsabilidad/"))
     w("/politica-de-privacidad/", legal("Política de privacidad", PRIVACIDAD, "/politica-de-privacidad/"))
     w("/condiciones/", legal("Condiciones generales de reserva", CONDICIONES, "/condiciones/"))
@@ -492,10 +534,24 @@ if __name__ == "__main__":
     else:
         open(os.path.join(SITE, "disponibilidad.json"), "w", encoding="utf8").write(json.dumps({"actualizado": None, "ocupado": []}))
     open(os.path.join(SITE, "robots.txt"), "w").write("User-agent: *\nAllow: /\nSitemap: https://valenbeach.com/sitemap.xml\n")
-    urls = ["/", "/en/", "/el-apartamento/", "/en/el-apartamento/", "/aviso-legal-y-exencion-de-responsabilidad/", "/politica-de-privacidad/", "/condiciones/"]
-    open(os.path.join(SITE, "sitemap.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://valenbeach.com{u}</loc></url>" for u in urls) + "</urlset>")
+    import datetime as _dt
+    _hoy = _dt.date.today().isoformat()
+    D = DATOS["dominio"]
+
+    def _entrada(u, alt=None):
+        x = f"<url><loc>{D}{u}</loc><lastmod>{_hoy}</lastmod>"
+        if alt:
+            x += "".join(f'<xhtml:link rel="alternate" hreflang="{l}" href="{D}{a}"/>' for l, a in alt.items())
+            x += f'<xhtml:link rel="alternate" hreflang="x-default" href="{D}{alt["en"]}"/>'
+        return x + "</url>"
+    legales = ["/aviso-legal-y-exencion-de-responsabilidad/", "/politica-de-privacidad/", "/condiciones/"]
+    entradas = [_entrada(RUTAS_INICIO[l], RUTAS_INICIO) for l, _, _ in LANGS] + [_entrada(RUTAS_APTO[l], RUTAS_APTO) for l, _, _ in LANGS] + [_entrada(u) for u in legales]
+    urls = entradas
+    open(os.path.join(SITE, "sitemap.xml"), "w", encoding="utf8").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(entradas) + "</urlset>")
+    if GOATCOUNTER:   # el script de estadisticas se sirve desde la propia web
+        shutil.copy(os.path.join(AQUI, "herramientas", "goatcounter-count.js"), os.path.join(SITE, "count.js"))
     if not BASE:  # produccion: dominio propio y pagina 404
         open(os.path.join(SITE, "CNAME"), "w").write("valenbeach.com\n")
-        p404 = legal("Página no encontrada", "<p>Esta página no existe o ha cambiado de sitio.</p><p><a href='/'>Volver al inicio</a> · <a href='/en/'>English</a></p>", "/404.html")
+        p404 = legal("Página no encontrada", "<p>Esta página no existe o ha cambiado de sitio.</p><p><a href='/'>Volver al inicio</a> · <a href='/en/'>English</a> · <a href='/de/'>Deutsch</a> · <a href='/fr/'>Français</a> · <a href='/nl/'>Nederlands</a></p>", "/404.html")
         open(os.path.join(SITE, "404.html"), "w", encoding="utf8").write(p404)
     print("docs/ generado:", len(urls), "paginas")
