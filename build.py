@@ -313,8 +313,8 @@ if(f){var est=document.getElementById('estimado');
     entrada:f.a.value,salida:f.b.value,personas:f.n.value,estimado:tot==null?'':String(tot),idioma:document.documentElement.lang,web:mf.elements.web.value,t:T0})})
    .then(function(r){return r.json().catch(function(){return {ok:false}})}).then(function(j){
     if(j&&j.ok){fb.textContent=L.ml_ok;fb.hidden=false;mf.reset();mf.hidden=true;ev('reserva-email-enviada');}
-    else{fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;}
-   }).catch(function(){fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;})
+    else{fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));fb.appendChild(document.createTextNode(L.mail));fb.hidden=false;}
+   }).catch(function(){fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));fb.appendChild(document.createTextNode(L.mail));fb.hidden=false;})
    .then(function(){bt.disabled=false;bt.textContent=mf.hidden?L0:L.ml_send;});});}
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
@@ -389,7 +389,7 @@ def estadisticas():
 
 def pie(t):
     es = t["lang"] == "es"
-    return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p>
+    return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · {DATOS['email']}</p>
 <p>{credito(t)}</p>
 <p><a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
 
@@ -425,7 +425,7 @@ def pagina_inicio(t):
     h = cabecera(t, t["title"], t["meta"], "", alt[t["lang"]], alt, hero=True)
     h += f"""<div class="hero"><div><div class="eyebrow">{e(t['eyebrow'])}</div><h1>{t['h1']}</h1><a class="btn" href="#reservar">{e(t['cta'])}</a></div></div>
 <main class="wrap"><section id="inicio"><div class="cols"><div><h2>{e(t['intro_h'])}</h2>{''.join(f'<p>{e(p)}</p>' for p in t['intro'])}</div>
-<div class="card"><h3 style="margin-top:0">{e(DATOS['nombre'])}</h3><p style="margin:.2em 0 1em">{e(DATOS['domicilio'])}</p><h3>{e(t['contacto_h'])}</h3><p style="margin:.2em 0">{t['disp']}<br><a href="tel:+{DATOS['tel_wa']}">{DATOS['tel_vis']}</a><br><a href="mailto:{DATOS['email']}">{DATOS['email']}</a><br><a href="{wa}" rel="noopener" target="_blank">WhatsApp</a></p></div></div></section>
+<div class="card"><h3 style="margin-top:0">{e(DATOS['nombre'])}</h3><p style="margin:.2em 0 1em">{e(DATOS['domicilio'])}</p><h3>{e(t['contacto_h'])}</h3><p style="margin:.2em 0">{t['disp']}<br><a href="tel:+{DATOS['tel_wa']}">{DATOS['tel_vis']}</a><br>{DATOS['email']}<br><a href="{wa}" rel="noopener" target="_blank">WhatsApp</a></p></div></div></section>
 <section id="descripcion"><h2>{e(t['desc_h'])}</h2>{''.join(f'<p>{e(p)}</p>' for p in t['desc'])}<div class="grid2">{bloques}</div><p class="meta"><b>{e(t['reg'])}:</b> {DATOS['registro']}</p></section>
 <section id="comodidades"><h2>{e(t['com_h'])}</h2><ul class="ticks grid2">{''.join(f'<li>{e(c)}</li>' for c in t['com'])}</ul><p class="meta">{e(t['com_nota'])}</p></section>
 <section id="fotos"><h2>{e(t['fotos_h'])}</h2><div class="gal">{fotos}</div></section>
@@ -436,7 +436,7 @@ def pagina_inicio(t):
 <label style="grid-column:1/-1">{t['ml_msg']}<textarea name="mensaje" rows="3" maxlength="1500" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);width:100%"></textarea></label>
 <input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
 <p class="meta" style="grid-column:1/-1;margin:0">{t['ml_priv']}</p></form>
-<p class="meta" id="mailfb" role="status" hidden></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
+<p class="meta" id="mailfb" role="status" hidden></p><p class="meta">{t['mail_nota']} {DATOS['email']}</p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
 <section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section>
@@ -507,7 +507,7 @@ CONDICIONES = f"""
 <p class="meta">Última actualización: {DATOS['fecha']}.</p>
 <p>Estas condiciones regulan el alquiler de corta estancia del apartamento <b>{DATOS['nombre']}</b>, en Torrox Costa (Málaga), con número de identificación oficial de alojamiento <b>{DATOS['registro']}</b>. Se complementan con el <a href="/aviso-legal-y-exencion-de-responsabilidad/">aviso legal</a> y la <a href="/politica-de-privacidad/">política de privacidad</a>.</p>
 <h2>1. Quién alquila</h2>
-<p>{DATOS['titular']}, NIF {DATOS['nif']}, con domicilio en {DATOS['domicilio']}. Contacto: <a href="mailto:{DATOS['email']}">{DATOS['email']}</a> · {DATOS['tel_vis']} (también por WhatsApp).</p>
+<p>{DATOS['titular']}, NIF {DATOS['nif']}, con domicilio en {DATOS['domicilio']}. Contacto: {DATOS['email']} · {DATOS['tel_vis']} (también por WhatsApp).</p>
 <h2>2. Solicitud y confirmación de la reserva</h2>
 <p>La solicitud se hace por WhatsApp, por correo electrónico o por teléfono. <b>La solicitud no es una reserva</b>: la reserva queda confirmada cuando el titular la acepta por escrito y se recibe la señal indicada abajo. La capacidad máxima del alojamiento es de <b>10 personas</b>. No se admiten mascotas.</p>
 <h2>3. Precio</h2>

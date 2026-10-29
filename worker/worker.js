@@ -2,7 +2,6 @@
 // (Email Routing, binding send_email). No guarda nada. El destino y el remitente vienen de variables del Worker, no del codigo.
 import { EmailMessage } from "cloudflare:email";
 
-const ORIGENES = ["https://valenbeach.com", "https://www.valenbeach.com"];
 const MAX = { nombre: 80, email: 120, tel: 30, mensaje: 1500 };
 
 const cors = (origen) => ({
@@ -20,6 +19,7 @@ const fechaOk = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 export default {
   async fetch(req, env) {
     const origen = req.headers.get("Origin") || "";
+    const ORIGENES = (env.ORIGENES || "https://valenbeach.com,https://www.valenbeach.com").split(",");   // webs autorizadas a usar este formulario
     if (!ORIGENES.includes(origen)) return new Response("Forbidden", { status: 403 });
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origen) });
     if (req.method !== "POST") return json({ ok: false, error: "metodo" }, 405, origen);
@@ -35,19 +35,20 @@ export default {
     if (!nombre || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json({ ok: false, error: "datos" }, 400, origen);
     if ((entrada && !fechaOk(entrada)) || (salida && !fechaOk(salida)) || (entrada && salida && salida <= entrada)) return json({ ok: false, error: "fechas" }, 400, origen);
 
-    const idioma = limpia(d.idioma, 5), estimado = limpia(d.estimado, 20);
+    const idioma = limpia(d.idioma, 5), estimado = limpia(d.estimado, 20), tema = limpia(d.asunto, 100);
     const cuerpo = [
-      "Nueva solicitud de reserva desde valenbeach.com", "",
+      `Nuevo mensaje desde ${env.SITIO || "valenbeach.com"}`, "",
       `Nombre: ${nombre}`, `Correo: ${email}`, tel ? `Teléfono: ${tel}` : null,
-      `Entrada: ${entrada || "(sin indicar)"}`, `Salida: ${salida || "(sin indicar)"}`,
-      `Personas: ${isNaN(personas) ? "(sin indicar)" : personas}`, estimado ? `Importe estimado de las noches: ${estimado} €` : null,
+      tema ? `Asunto: ${tema}` : null,
+      entrada || salida ? `Entrada: ${entrada || "(sin indicar)"}` : null, entrada || salida ? `Salida: ${salida || "(sin indicar)"}` : null,
+      isNaN(personas) ? null : `Personas: ${personas}`, estimado ? `Importe estimado de las noches: ${estimado} €` : null,
       `Idioma de la web: ${idioma || "?"}`, "", mensaje ? "Mensaje:\n" + mensaje : "(sin mensaje)", "",
       "— Para responder, usa «Responder»: el correo del cliente está en «Reply-To».",
     ].filter((x) => x !== null).join("\r\n");
 
-    const asunto = `Solicitud de reserva: ${nombre}${entrada && salida ? ` (${entrada} → ${salida})` : ""}`;
+    const asunto = `${env.ASUNTO || "Solicitud de reserva"}: ${nombre}${entrada && salida ? ` (${entrada} → ${salida})` : tema ? ` · ${tema}` : ""}`;
     const raw = [
-      `From: Valen Beach <${env.DESDE}>`, `To: ${env.DESTINO}`, `Reply-To: ${encabezado(nombre)} <${email}>`,
+      `From: ${encabezado(env.SITIO || "Valen Beach")} <${env.DESDE}>`, `To: ${env.DESTINO}`, `Reply-To: ${encabezado(nombre)} <${email}>`,
       `Subject: ${encabezado(asunto)}`, `Message-ID: <${crypto.randomUUID()}@valenbeach.com>`, `Date: ${new Date().toUTCString()}`,
       "MIME-Version: 1.0", "Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64", "",
       b64(cuerpo).replace(/(.{76})/g, "$1\r\n"),
