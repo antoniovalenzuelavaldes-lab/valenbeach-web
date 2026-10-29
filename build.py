@@ -183,6 +183,13 @@ from i18n_extra import EXTRA, NUEVOS
 for _k, _v in EXTRA.items():
     T[_k].update(_v)
 T.update(NUEVOS)
+MFB = {"es": "Si no se ha abierto tu programa de correo, hemos copiado el mensaje: pégalo en un correo a",
+       "en": "If your email app did not open, we have copied the message: paste it into an email to",
+       "de": "Falls sich Ihr E-Mail-Programm nicht geöffnet hat, haben wir die Nachricht kopiert: Fügen Sie sie in eine E-Mail an",
+       "fr": "Si votre messagerie ne s'est pas ouverte, nous avons copié le message : collez-le dans un e-mail à",
+       "nl": "Als uw e-mailprogramma niet is geopend, hebben we het bericht gekopieerd: plak het in een e-mail aan"}
+for _k, _v in MFB.items():
+    T[_k]["mfb"] = _v
 LANGS = [("es", "Español", "ES"), ("en", "English", "EN"), ("de", "Deutsch", "DE"), ("fr", "Français", "FR"), ("nl", "Nederlands", "NL")]
 RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/"}
 RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
@@ -276,7 +283,10 @@ if(f){var est=document.getElementById('estimado');
  f.addEventListener('submit',function(e){e.preventDefault();ev('reserva-whatsapp');
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
  var mb=document.getElementById('mailbtn');
- if(mb)mb.addEventListener('click',function(){ev('reserva-email');location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(mensaje())+'%0A%0A';});
+ if(mb)mb.addEventListener('click',function(){ev('reserva-email');var m=mensaje();
+  try{if(navigator.clipboard)navigator.clipboard.writeText(L.subj+'\\n\\n'+m)}catch(x){}
+  var fb=document.getElementById('mailfb');if(fb){fb.textContent=L.mfb+' '+L.mail+'.';fb.hidden=false}
+  location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(m);});
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
@@ -357,7 +367,7 @@ def pie(t):
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
-         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "solo": t["solo"], "min": t["min"]}
+         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "mfb": t["mfb"], "solo": t["solo"], "min": t["min"]}
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
 
 
@@ -393,7 +403,7 @@ def pagina_inicio(t):
 <section id="disponibilidad"><h2>{e(t['disp_h'])}</h2><div id="cal" class="meta">…</div><p class="meta" id="calnota">{e(t['disp_nota'])}</p></section>
 <section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta">{e(t['tar_nota'])}</p></section>
 <section id="reservar"><h2>{e(t['res_h'])}</h2><p>{e(t['res_p'])}</p>
-<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
+<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><p class="meta" id="mailfb" hidden></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
 <section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section>
