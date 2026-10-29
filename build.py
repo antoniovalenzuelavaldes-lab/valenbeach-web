@@ -190,6 +190,26 @@ MFB = {"es": "Si no se ha abierto tu programa de correo, hemos copiado el mensaj
        "nl": "Als uw e-mailprogramma niet is geopend, hebben we het bericht gekopieerd: plak het in een e-mail aan"}
 for _k, _v in MFB.items():
     T[_k]["mfb"] = _v
+FORM = {
+ "es": {"ml_nombre": "Nombre", "ml_email": "Tu correo", "ml_tel": "Teléfono (opcional)", "ml_msg": "Mensaje (opcional)", "ml_send": "Enviar solicitud", "ml_sending": "Enviando…",
+        "ml_ok": "¡Solicitud enviada! Te responderemos lo antes posible al correo que nos has indicado.", "ml_err": "No hemos podido enviar la solicitud. Inténtalo de nuevo o escríbenos a",
+        "ml_priv": "Usaremos tus datos solo para responder a tu solicitud. Más información en la política de privacidad (en español).", "ml_falta": "Rellena tu nombre y un correo válido."},
+ "en": {"ml_nombre": "Name", "ml_email": "Your email", "ml_tel": "Phone (optional)", "ml_msg": "Message (optional)", "ml_send": "Send request", "ml_sending": "Sending…",
+        "ml_ok": "Request sent! We will reply as soon as possible to the email you gave us.", "ml_err": "We could not send the request. Please try again or write to us at",
+        "ml_priv": "We will use your details only to answer your request. More information in the privacy policy (in Spanish).", "ml_falta": "Please enter your name and a valid email."},
+ "de": {"ml_nombre": "Name", "ml_email": "Ihre E-Mail", "ml_tel": "Telefon (optional)", "ml_msg": "Nachricht (optional)", "ml_send": "Anfrage senden", "ml_sending": "Wird gesendet…",
+        "ml_ok": "Anfrage gesendet! Wir antworten so schnell wie möglich an die angegebene E-Mail-Adresse.", "ml_err": "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder schreiben Sie uns an",
+        "ml_priv": "Wir verwenden Ihre Angaben nur, um Ihre Anfrage zu beantworten. Mehr dazu in der Datenschutzerklärung (auf Spanisch).", "ml_falta": "Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse an."},
+ "fr": {"ml_nombre": "Nom", "ml_email": "Votre e-mail", "ml_tel": "Téléphone (facultatif)", "ml_msg": "Message (facultatif)", "ml_send": "Envoyer la demande", "ml_sending": "Envoi en cours…",
+        "ml_ok": "Demande envoyée ! Nous vous répondrons dès que possible à l'adresse indiquée.", "ml_err": "Nous n'avons pas pu envoyer la demande. Réessayez ou écrivez-nous à",
+        "ml_priv": "Nous utiliserons vos données uniquement pour répondre à votre demande. Plus d'informations dans la politique de confidentialité (en espagnol).", "ml_falta": "Indiquez votre nom et une adresse e-mail valide."},
+ "nl": {"ml_nombre": "Naam", "ml_email": "Uw e-mail", "ml_tel": "Telefoon (optioneel)", "ml_msg": "Bericht (optioneel)", "ml_send": "Aanvraag versturen", "ml_sending": "Bezig met verzenden…",
+        "ml_ok": "Aanvraag verzonden! We antwoorden zo snel mogelijk op het opgegeven e-mailadres.", "ml_err": "De aanvraag kon niet worden verzonden. Probeer het opnieuw of schrijf ons op",
+        "ml_priv": "We gebruiken uw gegevens alleen om uw aanvraag te beantwoorden. Meer informatie in het privacybeleid (in het Spaans).", "ml_falta": "Vul uw naam en een geldig e-mailadres in."},
+}
+for _k, _v in FORM.items():
+    T[_k].update(_v)
+WORKER_URL = "https://valenbeach-reserva.antonio-valenzuela-valdes.workers.dev"
 LANGS = [("es", "Español", "ES"), ("en", "English", "EN"), ("de", "Deutsch", "DE"), ("fr", "Français", "FR"), ("nl", "Nederlands", "NL")]
 RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/"}
 RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
@@ -282,11 +302,20 @@ if(f){var est=document.getElementById('estimado');
  function ev(n){try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:n,title:n,event:true})}catch(x){}}
  f.addEventListener('submit',function(e){e.preventDefault();ev('reserva-whatsapp');
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
- var mb=document.getElementById('mailbtn');
- if(mb)mb.addEventListener('click',function(){ev('reserva-email');var m=mensaje();
-  try{if(navigator.clipboard)navigator.clipboard.writeText(L.subj+'\\n\\n'+m)}catch(x){}
-  var fb=document.getElementById('mailfb');if(fb){fb.textContent=L.mfb+' '+L.mail+'.';fb.hidden=false}
-  location.href='mailto:'+L.mail+'?subject='+encodeURIComponent(L.subj)+'&body='+encodeURIComponent(m);});
+ var mb=document.getElementById('mailbtn'),mf=document.getElementById('mailform'),fb=document.getElementById('mailfb'),T0=Date.now();
+ if(mb&&mf){mb.addEventListener('click',function(){ev('reserva-email');mf.hidden=!mf.hidden;if(!mf.hidden)mf.elements.nombre.focus();});
+  mf.addEventListener('submit',function(e){e.preventDefault();
+   var nom=mf.elements.nombre.value.trim(),em=mf.elements.email.value.trim();
+   if(!nom||!/^[^ @]+@[^ @]+[.][^ @]{2,}$/.test(em)){fb.textContent=L.ml_falta;fb.hidden=false;return;}
+   var bt=document.getElementById('mailsend');bt.disabled=true;bt.textContent=L.ml_sending;fb.hidden=true;
+   var tot=total(f.a.value,f.b.value);
+   fetch(L.worker,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nom,email:em,tel:mf.elements.tel.value,mensaje:mf.elements.mensaje.value,
+    entrada:f.a.value,salida:f.b.value,personas:f.n.value,estimado:tot==null?'':String(tot),idioma:document.documentElement.lang,web:mf.elements.web.value,t:T0})})
+   .then(function(r){return r.json().catch(function(){return {ok:false}})}).then(function(j){
+    if(j&&j.ok){fb.textContent=L.ml_ok;fb.hidden=false;mf.reset();mf.hidden=true;ev('reserva-email-enviada');}
+    else{fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;}
+   }).catch(function(){fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;})
+   .then(function(){bt.disabled=false;bt.textContent=L.ml_send;});});}
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
@@ -367,7 +396,7 @@ def pie(t):
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
-         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "mfb": t["mfb"], "solo": t["solo"], "min": t["min"]}
+         "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "mfb": t["mfb"], "worker": WORKER_URL, "ml_falta": t["ml_falta"], "ml_sending": t["ml_sending"], "ml_send": t["ml_send"], "ml_ok": t["ml_ok"], "ml_err": t["ml_err"], "solo": t["solo"], "min": t["min"]}
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
 
 
@@ -403,7 +432,11 @@ def pagina_inicio(t):
 <section id="disponibilidad"><h2>{e(t['disp_h'])}</h2><div id="cal" class="meta">…</div><p class="meta" id="calnota">{e(t['disp_nota'])}</p></section>
 <section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta">{e(t['tar_nota'])}</p></section>
 <section id="reservar"><h2>{e(t['res_h'])}</h2><p>{e(t['res_p'])}</p>
-<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><p class="meta" id="mailfb" hidden></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
+<form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><form class="res" id="mailform" hidden><label>{t['ml_nombre']}<input name="nombre" required maxlength="80" autocomplete="name"></label><label>{t['ml_email']}<input name="email" type="email" required maxlength="120" autocomplete="email"></label><label>{t['ml_tel']}<input name="tel" type="tel" maxlength="30" autocomplete="tel"></label>
+<label style="grid-column:1/-1">{t['ml_msg']}<textarea name="mensaje" rows="3" maxlength="1500" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);width:100%"></textarea></label>
+<input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+<p class="meta" style="grid-column:1/-1;margin:0">{t['ml_priv']}</p><button class="btn" type="submit" id="mailsend">{t['ml_send']}</button></form>
+<p class="meta" id="mailfb" role="status" hidden></p><p class="meta">{t['mail_nota']} <a href="mailto:{DATOS['email']}">{DATOS['email']}</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
 <section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section>
@@ -455,11 +488,13 @@ PRIVACIDAD = f"""
 <table><tr><th>Datos</th><th>Finalidad</th><th>Base jurídica</th></tr>
 <tr><td>Los que nos facilites al contactar (nombre, teléfono, correo, fechas y número de personas) por WhatsApp, teléfono o correo electrónico</td><td>Responder a tu consulta y gestionar tu solicitud de reserva</td><td>Medidas precontractuales a petición tuya (art. 6.1.b RGPD)</td></tr>
 <tr><td>Datos de los huéspedes que exige la normativa de registro de viajeros (nombre, documento de identidad y matrícula del vehículo)</td><td>Cumplir la obligación de registro documental e información a las autoridades</td><td>Obligación legal (art. 6.1.c)</td></tr>
-<tr><td>Datos de pago y facturación, si los hay</td><td>Cobrar la estancia y cumplir las obligaciones fiscales</td><td>Ejecución del contrato y obligación legal (art. 6.1.b y 6.1.c)</td></tr><tr><td>Datos técnicos de la visita (página, web de origen, país, navegador y tamaño de pantalla), sin IP ni cookies</td><td>Medir el uso de la web para mejorarla</td><td>Interés legítimo (art. 6.1.f RGPD)</td></tr></table>
+<tr><td>Datos de pago y facturación, si los hay</td><td>Cobrar la estancia y cumplir las obligaciones fiscales</td><td>Ejecución del contrato y obligación legal (art. 6.1.b y 6.1.c)</td></tr><tr><td>Los que nos facilites en el formulario de solicitud por correo (nombre, correo, teléfono opcional, fechas y mensaje)</td><td>Responder a tu solicitud de reserva</td><td>Medidas precontractuales a petición tuya (art. 6.1.b RGPD)</td></tr>
+<tr><td>Datos técnicos de la visita (página, web de origen, país, navegador y tamaño de pantalla), sin IP ni cookies</td><td>Medir el uso de la web para mejorarla</td><td>Interés legítimo (art. 6.1.f RGPD)</td></tr></table>
 <p>Esta web <b>no tiene formularios que guarden datos</b> y <b>no usa cookies</b>. Para saber cuánta gente la visita usamos <b>GoatCounter</b>, un servicio de estadísticas sin cookies que no guarda tu dirección IP ni te identifica, y que no se activa si tu navegador indica «no rastrear». El formulario de «Solicitar reserva» solo prepara un mensaje y abre WhatsApp en tu dispositivo: no recibimos nada hasta que tú lo envías por WhatsApp.</p>
 <h2>3. Destinatarios</h2>
 <p>No cedemos tus datos a terceros salvo obligación legal (por ejemplo, a las administraciones competentes en materia de registro de viajeros o tributaria). Usamos WhatsApp (Meta) como canal de comunicación si tú nos escribes por ese medio, y el proveedor de alojamiento web para servir esta página, que puede registrar tu dirección IP por motivos técnicos y de seguridad.</p>
 <p>Para las estadísticas de visitas usamos GoatCounter, que no recibe tu correo ni ningún dato que nos facilites por WhatsApp o correo electrónico.</p>
+<p>El formulario de solicitud por correo envía tu mensaje a nuestro correo mediante un servicio de Cloudflare (que solo lo transmite y no lo guarda); lo recibimos en nuestro buzón y se conserva en él como cualquier otro correo.</p>
 <h2>4. Conservación</h2>
 <p>Conservamos las conversaciones y los datos de la solicitud el tiempo necesario para atenderla y, si hay reserva, durante los plazos que exijan las normas de registro, fiscales y mercantiles.</p>
 <h2>5. Tus derechos</h2>
