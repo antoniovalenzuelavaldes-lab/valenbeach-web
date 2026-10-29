@@ -73,7 +73,7 @@ a{color:var(--acc)}
 <form class="res" id="resform"><label>Arrivée<input type="date" name="a"></label><label>Départ<input type="date" name="b"></label><label>Personnes<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">Ouvrir WhatsApp</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">Envoyer par e-mail</button></form><p class="meta" id="estimado"></p><form class="res" id="mailform" hidden><label>Nom<input name="nombre" required maxlength="80" autocomplete="name"></label><label>Votre e-mail<input name="email" type="email" required maxlength="120" autocomplete="email"></label><label>Téléphone (facultatif)<input name="tel" type="tel" maxlength="30" autocomplete="tel"></label>
 <label style="grid-column:1/-1">Message (facultatif)<textarea name="mensaje" rows="3" maxlength="1500" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);width:100%"></textarea></label>
 <input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
-<p class="meta" style="grid-column:1/-1;margin:0">Nous utiliserons vos données uniquement pour répondre à votre demande. Plus d'informations dans la politique de confidentialité (en espagnol).</p><button class="btn" type="submit" id="mailsend">Envoyer la demande</button></form>
+<p class="meta" style="grid-column:1/-1;margin:0">Nous utiliserons vos données uniquement pour répondre à votre demande. Plus d'informations dans la politique de confidentialité (en espagnol).</p></form>
 <p class="meta" id="mailfb" role="status" hidden></p><p class="meta">Vous n'utilisez pas WhatsApp ? Écrivez-nous à <a href="mailto:antonio@valenbeach.com">antonio@valenbeach.com</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="Antonio Valenzuela Valdes" width="96" height="96"><div><p>« Profitez de vacances inoubliables dans notre maison face à la mer, où chaque lever et coucher de soleil devient un spectacle unique de tranquillité et de beauté. »</p><small>Antonio Valenzuela, propriétaire</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>Situation</h2><div class="cols"><div><p>Urbanización Duna Beach 2 · Carretera de Almería 23b, 29770 Torrox (Málaga, Espagne)</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">Voir sur la carte</a></p><h3>Torrox Costa et El Morche</h3><p>Profitez de l&#x27;un des meilleurs climats d&#x27;Europe et de nombreuses activités à Torrox et dans les environs.</p><p>La plage de Las Dunas, à quelques mètres, est la plus belle plage de la région.</p></div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
@@ -106,11 +106,11 @@ if(f){var est=document.getElementById('estimado');
  f.addEventListener('submit',function(e){e.preventDefault();ev('reserva-whatsapp');
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
  var mb=document.getElementById('mailbtn'),mf=document.getElementById('mailform'),fb=document.getElementById('mailfb'),T0=Date.now();
- if(mb&&mf){mb.addEventListener('click',function(){ev('reserva-email');mf.hidden=!mf.hidden;if(!mf.hidden)mf.elements.nombre.focus();});
+ if(mb&&mf){var L0=mb.textContent;mb.addEventListener('click',function(){if(mf.hidden){ev('reserva-email');mf.hidden=false;mb.textContent=L.ml_send;mf.elements.nombre.focus();}else if(mf.reportValidity()){mf.requestSubmit();}});
   mf.addEventListener('submit',function(e){e.preventDefault();
    var nom=mf.elements.nombre.value.trim(),em=mf.elements.email.value.trim();
    if(!nom||!/^[^ @]+@[^ @]+[.][^ @]{2,}$/.test(em)){fb.textContent=L.ml_falta;fb.hidden=false;return;}
-   var bt=document.getElementById('mailsend');bt.disabled=true;bt.textContent=L.ml_sending;fb.hidden=true;
+   var bt=mb;bt.disabled=true;bt.textContent=L.ml_sending;fb.hidden=true;
    var tot=total(f.a.value,f.b.value);
    fetch(L.worker,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nom,email:em,tel:mf.elements.tel.value,mensaje:mf.elements.mensaje.value,
     entrada:f.a.value,salida:f.b.value,personas:f.n.value,estimado:tot==null?'':String(tot),idioma:document.documentElement.lang,web:mf.elements.web.value,t:T0})})
@@ -118,7 +118,7 @@ if(f){var est=document.getElementById('estimado');
     if(j&&j.ok){fb.textContent=L.ml_ok;fb.hidden=false;mf.reset();mf.hidden=true;ev('reserva-email-enviada');}
     else{fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;}
    }).catch(function(){fb.innerHTML='';fb.appendChild(document.createTextNode(L.ml_err+' '));var a=document.createElement('a');a.href='mailto:'+L.mail;a.textContent=L.mail;fb.appendChild(a);fb.hidden=false;})
-   .then(function(){bt.disabled=false;bt.textContent=L.ml_send;});});}
+   .then(function(){bt.disabled=false;bt.textContent=mf.hidden?L0:L.ml_send;});});}
  var hoy0=new Date().toISOString().slice(0,10);f.a.min=hoy0;f.b.min=hoy0;
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
