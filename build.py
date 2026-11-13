@@ -425,7 +425,7 @@ def pagina_inicio(t):
     h = cabecera(t, t["title"], t["meta"], "", alt[t["lang"]], alt, hero=True)
     h += f"""<div class="hero"><div><div class="eyebrow">{e(t['eyebrow'])}</div><h1>{t['h1']}</h1><a class="btn" href="#reservar">{e(t['cta'])}</a></div></div>
 <main class="wrap"><section id="inicio"><div class="cols"><div><h2>{e(t['intro_h'])}</h2>{''.join(f'<p>{e(p)}</p>' for p in t['intro'])}</div>
-<div class="card"><h3 style="margin-top:0">{e(DATOS['nombre'])}</h3><p style="margin:.2em 0 1em">{e(DATOS['domicilio'])}</p><h3>{e(t['contacto_h'])}</h3><p style="margin:.2em 0">{t['disp']}<br><a href="tel:+{DATOS['tel_wa']}">{DATOS['tel_vis']}</a><br>{DATOS['email']}<br><a href="{wa}" rel="noopener" target="_blank">WhatsApp</a></p></div></div></section>
+<div class="card"><h3 style="margin-top:0">{e(DATOS['nombre'])}</h3><p style="margin:.2em 0 1em">{e(DATOS['domicilio'])}</p><h3>{e(t['contacto_h'])}</h3><p style="margin:.2em 0">{t['disp']}<br><a href="tel:+{DATOS['tel_wa']}">{DATOS['tel_vis']}</a><br><a href="mailto:{DATOS['email']}">{DATOS['email']}</a><br><a href="{wa}" rel="noopener" target="_blank">WhatsApp</a></p></div></div></section>
 <section id="descripcion"><h2>{e(t['desc_h'])}</h2>{''.join(f'<p>{e(p)}</p>' for p in t['desc'])}<div class="grid2">{bloques}</div><p class="meta"><b>{e(t['reg'])}:</b> {DATOS['registro']}</p></section>
 <section id="comodidades"><h2>{e(t['com_h'])}</h2><ul class="ticks grid2">{''.join(f'<li>{e(c)}</li>' for c in t['com'])}</ul><p class="meta">{e(t['com_nota'])}</p></section>
 <section id="fotos"><h2>{e(t['fotos_h'])}</h2><div class="gal">{fotos}</div></section>
