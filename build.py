@@ -292,7 +292,10 @@ function total(a,b){if(!T||!a||!b)return null;var s=new Date(a+'T00:00:00Z'),e=n
 function fmt(s){var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 var B=window.VB_BASE||'';
 var f=document.getElementById('resform');
-var pT=fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+var SB='https://btgvanarwjaqxzlxsyao.supabase.co',AK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Z3ZhbmFyd2phcXh6bHhzeWFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyMDAyOTIsImV4cCI6MjEwOTc3NjI5Mn0.U-RWs2Zrg1rPcxApVQBetITn1ROsGmPG-z7Gmj1yNG0';
+/* Bloqueos y precios editados en el panel de administracion (Supabase). Si falla, se usan los ficheros estaticos. */
+var pS=fetch(SB+'/rest/v1/rpc/publico',{method:'POST',headers:{apikey:AK,'Content-Type':'application/json','Content-Profile':'alquiler'},body:'{"p_web":"valenbeach"}',cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+var pT=pS.then(function(s){if(s&&s.tarifas&&s.tarifas.precio_base_noche!=null)return s.tarifas;return fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});});
 if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
  function act(){var t=total(f.a.value,f.b.value),mn=T&&T.estancia_minima_noches,nn=0;if(f.a.value&&f.b.value)nn=Math.round((new Date(f.b.value)-new Date(f.a.value))/864e5);if(est)est.textContent=(mn&&nn>0&&nn<mn)?L.min.replace('{n}',mn):(t==null?'':L.est.replace('{t}',t));}
@@ -320,8 +323,9 @@ if(f){var est=document.getElementById('estimado');
  f.a.addEventListener('change',function(){f.b.min=f.a.value||hoy0;});}
 var cal=document.getElementById('cal');
 if(cal){
- Promise.all([fetch(B+'/disponibilidad.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}),pT]).then(function(rs){
- var d=rs[0];T=rs[1];var hay=d&&d.actualizado&&Array.isArray(d.ocupado),oc={};
+ Promise.all([fetch(B+'/disponibilidad.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}),pT,pS]).then(function(rs){
+ var d=rs[0];T=rs[1];var man=rs[2]&&Array.isArray(rs[2].ocupado)?rs[2].ocupado:[];
+ if(d&&d.actualizado&&Array.isArray(d.ocupado))d={actualizado:d.actualizado,ocupado:d.ocupado.concat(man)};var hay=d&&d.actualizado&&Array.isArray(d.ocupado),oc={};
  var nn=document.getElementById('calnota');
  if(!hay&&!T){cal.textContent=L.sin;if(nn)nn.hidden=true;return;}
  if(!hay){if(nn)nn.textContent=L.solo;}
