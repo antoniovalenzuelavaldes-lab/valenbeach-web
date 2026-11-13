@@ -95,9 +95,8 @@ function total(a,b){if(!T||!a||!b)return null;var s=new Date(a+'T00:00:00Z'),e=n
 function fmt(s){var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 var B=window.VB_BASE||'';
 var f=document.getElementById('resform');
-var SB='https://btgvanarwjaqxzlxsyao.supabase.co',AK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Z3ZhbmFyd2phcXh6bHhzeWFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyMDAyOTIsImV4cCI6MjEwOTc3NjI5Mn0.U-RWs2Zrg1rPcxApVQBetITn1ROsGmPG-z7Gmj1yNG0';
-/* Bloqueos y precios editados en el panel de administracion (Supabase). Si falla, se usan los ficheros estaticos. */
-var pS=fetch(SB+'/rest/v1/rpc/publico',{method:'POST',headers:{apikey:AK,'Content-Type':'application/json','Content-Profile':'alquiler'},body:'{"p_web":"valenbeach"}',cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+/* Bloqueos y precios editados en el panel de administracion (Worker alquiler-admin, base D1). Si falla, se usan los ficheros estaticos. */
+var pS=fetch('https://alquiler-admin.antonio-valenzuela-valdes.workers.dev/pub/valenbeach',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
 var pT=pS.then(function(s){if(s&&s.tarifas&&s.tarifas.precio_base_noche!=null)return s.tarifas;return fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});});
 if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
