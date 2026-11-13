@@ -1,11 +1,11 @@
 """Sube el Worker `valenbeach-reserva` a Cloudflare (API oficial) y activa su direccion workers.dev.
 Uso:  python desplegar.py <destino verificado> [nombre] [remitente] [origenes separados por comas] [sitio] [asunto]
 Sin argumentos extra despliega el Worker de valenbeach.com.
-El token se lee de C:\\Users\\AntonioVV\\.cloudflare_token y nunca se imprime. El destino NO se guarda en el repositorio."""
+El token se lee de C:\\Proyectos\\01.secretos\\cloudflare_token.txt y nunca se imprime. El destino NO se guarda en el repositorio."""
 import json, os, sys, uuid, urllib.request
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-token = open(os.path.expanduser(r"~\.cloudflare_token")).read().strip()
+token = open(r"C:\Proyectos\01.secretos\cloudflare_token.txt").read().strip()
 destino = sys.argv[1]
 NOMBRE = sys.argv[2] if len(sys.argv) > 2 else "valenbeach-reserva"
 DESDE = sys.argv[3] if len(sys.argv) > 3 else "reservas@valenbeach.com"
