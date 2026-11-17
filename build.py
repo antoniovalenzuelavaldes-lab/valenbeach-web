@@ -1,6 +1,6 @@
 """Genera la web estatica de Valenbeach en site/ (ES y EN). Uso: python build.py
 Sin dependencias externas, sin cookies, sin recursos de terceros."""
-import os, json, html
+import os, json, html, re
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(AQUI, "docs")
@@ -16,8 +16,8 @@ DATOS = {
     "tel_vis": "(+34) 615 174 997",
     "tel_wa": "34615174997",
     "registro": "AT-434842-A",
-    "fecha": "29 de octubre de 2026",
-    "date_en": "29 October 2026",
+    "fecha": "17 de noviembre de 2026",
+    "date_en": "17 November 2026",
     "dominio": "https://valenbeach.com",
 }
 
@@ -49,7 +49,7 @@ T = {
     ("Cocina", ["Cocina eléctrica, horno eléctrico, microondas, lavavajillas, frigorífico, cafetera, calentador de agua, batidora, tostador y exprimidor"]),
     ("Dormitorios y baños", ["1 dormitorio con cama de matrimonio, aire acondicionado y baño en suite", "1 dormitorio con cama de matrimonio, aire acondicionado y ventilador", "1 dormitorio con cama de matrimonio y una cama adicional tipo litera", "1 dormitorio con 3 camas individuales (200 × 105 cm), aire acondicionado y ventilador", "Baño en suite con lavabo, ducha-bañera, bidé e inodoro", "Cuarto de baño con lavabo, ducha-bañera, bidé e inodoro"]),
     ("Exterior", ["Piscina comunitaria", "Jardín comunitario con césped y árboles", "Zona exterior para sentarse", "Plaza de parking privada"]),
-    ("Más información", ["Playa más cercana: Las Dunas (a menos de 100 m)", "Aeropuerto más cercano: Málaga (a menos de 60 km)", "No se admiten mascotas", "Muy apto para familias con niños"]),
+    ("Más información", ["Playa más cercana: Las Dunas (a menos de 100 m)", "Aeropuerto más cercano: Málaga (a unos 64 km)", "No se admiten mascotas", "Muy apto para familias con niños"]),
     ("Incluido en el precio", ["Wifi", "Aspiradora, plancha y tabla de planchar", "Ropa de cama y toallas", "Entrada autónoma mediante llave electrónica", "Calefacción y aire acondicionado por bomba de calor", "Limpieza final"]),
     ("Con suplemento", ["Cuna", "Late check-in / check-out", "Reserva de taxis"]),
     ("Deporte", ["Tenis (a menos de 1000 m)", "Golf (a menos de 10 km)"]),
@@ -123,7 +123,7 @@ T = {
     ("Kitchen", ["Electric hob, electric oven, microwave, dishwasher, fridge, coffee maker, water heater, blender, toaster and juicer"]),
     ("Bedrooms and bathrooms", ["1 bedroom with a double bed, air conditioning and en-suite bathroom", "1 bedroom with a double bed, air conditioning and a fan", "1 bedroom with a double bed and an extra bunk-style bed", "1 bedroom with 3 single beds (200 × 105 cm), air conditioning and a fan", "En-suite bathroom with washbasin, bath-shower, bidet and toilet", "Bathroom with washbasin, bath-shower, bidet and toilet"]),
     ("Outside", ["Shared swimming pool", "Shared garden with lawn and trees", "Outdoor seating area", "Private parking space"]),
-    ("More information", ["Nearest beach: Las Dunas (less than 100 m)", "Nearest airport: Málaga (less than 60 km)", "No pets allowed", "Very suitable for families with children"]),
+    ("More information", ["Nearest beach: Las Dunas (less than 100 m)", "Nearest airport: Málaga (about 64 km)", "No pets allowed", "Very suitable for families with children"]),
     ("Included in the price", ["Wifi", "Vacuum cleaner, iron and ironing board", "Bed linen and towels", "Self check-in with an electronic key", "Heating and air conditioning by heat pump", "Final cleaning"]),
     ("Extra charge", ["Cot", "Late check-in / check-out", "Taxi booking"]),
     ("Sports", ["Tennis (less than 1000 m)", "Golf (less than 10 km)"]),
@@ -164,7 +164,7 @@ T = {
   "opiniones": [("Vanessa", "2024", "A very nice, big apartment right next to the beach. Everything was great. We loved it. It is just like the photos. I recommend it."),
                 ("Irene (Spain)", "2024", "The apartment is perfect for a big family, it has 4 spacious rooms and two bathrooms. The living room/kitchen is very large and comfortable and the terrace is huge. Overall we found the apartment and the beach front location in a quiet area great. I would definitely repeat."),
                 ("Ana (Spain)", "2023", "Spacious, with everything you need for a very pleasant stay. It is in a very quiet area, but a 5 min walk away you have restaurants and services. The beach at the foot of the urbanization.")],
-  "foot_leg": "Legal notice (Spanish)", "foot_pri": "Privacy (Spanish)", "foot_con": "Booking conditions (Spanish)",
+  "foot_leg": "Legal notice", "foot_pri": "Privacy", "foot_con": "Booking conditions",
   "foot_tit": "Owner", "foot_reg": "Registration",
   "ap_title": "The apartment · Valen Beach",
   "ap_desc": "Bedrooms, living-kitchen, terrace and bathrooms of the Valen Beach apartment in Torrox Costa.",
@@ -193,27 +193,30 @@ for _k, _v in MFB.items():
 FORM = {
  "es": {"ml_nombre": "Nombre", "ml_email": "Tu correo", "ml_tel": "Teléfono (opcional)", "ml_msg": "Mensaje (opcional)", "ml_send": "Enviar solicitud", "ml_sending": "Enviando…",
         "ml_ok": "¡Solicitud enviada! Te responderemos lo antes posible al correo que nos has indicado.", "ml_err": "No hemos podido enviar la solicitud. Inténtalo de nuevo o escríbenos a",
-        "ml_priv": "Usaremos tus datos solo para responder a tu solicitud. Más información en la política de privacidad (en español).", "ml_falta": "Rellena tu nombre y un correo válido."},
+        "ml_priv": "Usaremos tus datos solo para responder a tu solicitud. Más información en la política de privacidad.", "ml_falta": "Rellena tu nombre y un correo válido."},
  "en": {"ml_nombre": "Name", "ml_email": "Your email", "ml_tel": "Phone (optional)", "ml_msg": "Message (optional)", "ml_send": "Send request", "ml_sending": "Sending…",
         "ml_ok": "Request sent! We will reply as soon as possible to the email you gave us.", "ml_err": "We could not send the request. Please try again or write to us at",
-        "ml_priv": "We will use your details only to answer your request. More information in the privacy policy (in Spanish).", "ml_falta": "Please enter your name and a valid email."},
+        "ml_priv": "We will use your details only to answer your request. More information in the privacy policy.", "ml_falta": "Please enter your name and a valid email."},
  "de": {"ml_nombre": "Name", "ml_email": "Ihre E-Mail", "ml_tel": "Telefon (optional)", "ml_msg": "Nachricht (optional)", "ml_send": "Anfrage senden", "ml_sending": "Wird gesendet…",
         "ml_ok": "Anfrage gesendet! Wir antworten so schnell wie möglich an die angegebene E-Mail-Adresse.", "ml_err": "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder schreiben Sie uns an",
-        "ml_priv": "Wir verwenden Ihre Angaben nur, um Ihre Anfrage zu beantworten. Mehr dazu in der Datenschutzerklärung (auf Spanisch).", "ml_falta": "Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse an."},
+        "ml_priv": "Wir verwenden Ihre Angaben nur, um Ihre Anfrage zu beantworten. Mehr dazu in der Datenschutzerklärung.", "ml_falta": "Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse an."},
  "fr": {"ml_nombre": "Nom", "ml_email": "Votre e-mail", "ml_tel": "Téléphone (facultatif)", "ml_msg": "Message (facultatif)", "ml_send": "Envoyer la demande", "ml_sending": "Envoi en cours…",
         "ml_ok": "Demande envoyée ! Nous vous répondrons dès que possible à l'adresse indiquée.", "ml_err": "Nous n'avons pas pu envoyer la demande. Réessayez ou écrivez-nous à",
-        "ml_priv": "Nous utiliserons vos données uniquement pour répondre à votre demande. Plus d'informations dans la politique de confidentialité (en espagnol).", "ml_falta": "Indiquez votre nom et une adresse e-mail valide."},
+        "ml_priv": "Nous utiliserons vos données uniquement pour répondre à votre demande. Plus d'informations dans la politique de confidentialité.", "ml_falta": "Indiquez votre nom et une adresse e-mail valide."},
  "nl": {"ml_nombre": "Naam", "ml_email": "Uw e-mail", "ml_tel": "Telefoon (optioneel)", "ml_msg": "Bericht (optioneel)", "ml_send": "Aanvraag versturen", "ml_sending": "Bezig met verzenden…",
         "ml_ok": "Aanvraag verzonden! We antwoorden zo snel mogelijk op het opgegeven e-mailadres.", "ml_err": "De aanvraag kon niet worden verzonden. Probeer het opnieuw of schrijf ons op",
-        "ml_priv": "We gebruiken uw gegevens alleen om uw aanvraag te beantwoorden. Meer informatie in het privacybeleid (in het Spaans).", "ml_falta": "Vul uw naam en een geldig e-mailadres in."},
+        "ml_priv": "We gebruiken uw gegevens alleen om uw aanvraag te beantwoorden. Meer informatie in het privacybeleid.", "ml_falta": "Vul uw naam en een geldig e-mailadres in."},
 }
 for _k, _v in FORM.items():
     T[_k].update(_v)
 WORKER_URL = "https://valenbeach-reserva.antonio-valenzuela-valdes.workers.dev"
 LANGS = [("es", "Español", "ES"), ("en", "English", "EN"), ("de", "Deutsch", "DE"), ("fr", "Français", "FR"), ("nl", "Nederlands", "NL")]
 RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/"}
-from invierno import INVIERNO, RUTAS_INVIERNO
+from invierno import INVIERNO, RUTAS_INVIERNO, NEARBY
+for _l, _x in NEARBY.items():
+    T[_l]["torrox"] = list(T[_l]["torrox"]) + [_x]
 from invierno_js import JS_TXT
+from legal_i18n import LEGAL, RUTAS_LEGAL, FECHAS, NOTA
 RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
 GOATCOUNTER = "valenbeach"   # cuenta de GoatCounter (estadisticas sin cookies); crearla en goatcounter.com con este codigo
 
@@ -271,7 +274,7 @@ form.res input{font:inherit;padding:10px;border:1px solid var(--line);border-rad
 .dias span{padding:5px 0;border-radius:4px}.dias .h{color:var(--mut);font-size:.72rem}
 .dias .l{background:color-mix(in srgb,var(--wa) 18%,transparent)}.dias .o{background:color-mix(in srgb,#c0392b 28%,transparent);text-decoration:line-through;color:var(--mut)}
 .dias .p{opacity:.35}.dias small{display:block;font-size:.62rem;color:var(--mut);line-height:1}.dias .n{background:color-mix(in srgb,var(--acc) 8%,transparent)}
-.calwrap{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;align-items:start}.calres{position:sticky;top:12px;background:var(--card);border:2px solid var(--acc);border-radius:12px;padding:14px 16px}.calres p{margin:.25em 0}.calres .acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.calres .btn{margin:0}.calres .sec{background:transparent;color:var(--fg);border:1px solid var(--line)}@media(max-width:900px){.calwrap{grid-template-columns:1fr}.calres{order:-1;top:8px;z-index:5;box-shadow:0 6px 22px rgba(0,0,0,.18)}}
+.calwrap{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;align-items:start}.calres{position:sticky;top:12px;background:var(--card);border:2px solid var(--acc);border-radius:12px;padding:14px 16px}.calres p{margin:.25em 0}.calres .aviso{color:var(--acc2);font-weight:600;font-size:.92rem}.calres .acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.calres .btn{margin:0}.calres .sec{background:transparent;color:var(--fg);border:1px solid var(--line)}@media(max-width:900px){.calwrap{grid-template-columns:1fr}.calres{order:-1;top:8px;z-index:5;box-shadow:0 6px 22px rgba(0,0,0,.18)}}
 .dias [data-d]{cursor:pointer}.dias [data-d]:hover{outline:1px solid var(--acc)}.dias .sel{background:var(--acc);color:#fff;text-decoration:none}.dias .sel small{color:#fff}
 footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;font-size:.88rem;color:var(--mut)}
 footer a{color:var(--mut)}
@@ -296,9 +299,15 @@ function calc(a,b){if(!T||!a||!b)return null;var s=new Date(a+'T00:00:00Z'),e=ne
  var ks=[],i;for(var x=new Date(s);x<e;x.setUTCDate(x.getUTCDate()+1))ks.push(iso(x));
  var n=ks.length,base=0;for(i=0;i<n;i++)base+=precio(ks[i]);
  var best={t:base,p:0};
- (T.descuentos||[]).forEach(function(d){if(n>d.mas_de){var t=0;for(i=0;i<n;i++){var pr=precio(ks[i]);t+=inPer(ks[i],d)?pr*(1-d.porcentaje/100):pr;}t=Math.round(t*100)/100;if(t<best.t)best={t:t,p:d.porcentaje};}});
+ (T.descuentos||[]).forEach(function(d){if(n>=d.min_noches){var t=0;for(i=0;i<n;i++){var pr=precio(ks[i]);t+=inPer(ks[i],d)?pr*(1-d.porcentaje/100):pr;}t=Math.round(t*100)/100;if(t<best.t)best={t:t,p:d.porcentaje};}});
  return {t:best.t,p:best.p,n:n};}
 function total(a,b){var c=calc(a,b);return c?c.t:null;}
+function aviso(a,b){var c=calc(a,b);if(!T||!c)return '';var ks=[],i;
+ for(var x=new Date(a+'T00:00:00Z'),e=new Date(b+'T00:00:00Z');x<e;x.setUTCDate(x.getUTCDate()+1))ks.push(iso(x));
+ var best=null,cur=c.p||0;
+ (T.descuentos||[]).forEach(function(d){if(c.n<d.min_noches&&d.porcentaje>cur){var dentro=false;for(i=0;i<ks.length;i++)if(inPer(ks[i],d)){dentro=true;break;}
+  if(dentro&&(!best||d.min_noches<best.min_noches))best=d;}});
+ return best?L.dtoAviso.replace('{n}',best.min_noches).replace('{p}',best.porcentaje):'';}
 function estText(a,b){var c=calc(a,b),mn=T&&T.estancia_minima_noches,nn=c?c.n:0;
  if(mn&&nn>0&&nn<mn)return L.min.replace('{n}',mn);
  return c?L.est.replace('{t}',c.t)+(c.p?' '+L.dto.replace('{p}',c.p):''):'';}
@@ -310,11 +319,11 @@ var pS=fetch('https://alquiler-admin.antonio-valenzuela-valdes.workers.dev/pub/v
 var pT=pS.then(function(s){if(s&&s.tarifas&&s.tarifas.precio_base_noche!=null)return s.tarifas;return fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});});
 (function(){var els=document.querySelectorAll('.dtoTxt');if(!els.length)return;pT.then(function(t){var ds=(t&&t.descuentos)||[];if(!ds.length)return;
  var fm=function(md){var q=md.split('-');return q[1]+'/'+q[0];};
- var txt=ds.map(function(d){return L.dtoLinea.replace('{n}',d.mas_de).replace('{p}',d.porcentaje).replace('{a}',fm(d.desde)).replace('{b}',fm(d.hasta));}).join(' ');
+ var txt=ds.map(function(d){return L.dtoLinea.replace('{n}',d.min_noches).replace('{p}',d.porcentaje).replace('{a}',fm(d.desde)).replace('{b}',fm(d.hasta));}).join(' ');
  els.forEach(function(el){el.textContent=txt;el.hidden=false;});});})();
 if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
- function act(){if(est)est.textContent=estText(f.a.value,f.b.value);}
+ function act(){var av=aviso(f.a.value,f.b.value);if(est)est.textContent=estText(f.a.value,f.b.value)+(av?' '+av:'');}
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
  function mensaje(){var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
   if(t!=null)m+=L.estmsg.replace('{t}',t);return m;}
@@ -372,6 +381,7 @@ if(cal){
   det.innerHTML='';hint.textContent='';
   var l1=document.createElement('p');l1.style.fontWeight='600';l1.textContent=L.hint2.replace('{a}',fmt(sel.a)).replace('{b}',fmt(sel.b)).replace('{n}',n);det.appendChild(l1);
   if(imp){var l2=document.createElement('p');l2.textContent=imp;det.appendChild(l2);}
+  var av=aviso(sel.a,sel.b);if(av){var l3=document.createElement('p');l3.className='aviso';l3.textContent=av;det.appendChild(l3);}
   var ac=document.createElement('div');ac.className='acc';
   var b1=document.createElement('button');b1.type='button';b1.className='btn';b1.textContent=L.resBtn;
   b1.addEventListener('click',function(){var r=document.getElementById('reservar');if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});});
@@ -438,7 +448,7 @@ def pie(t):
     es = t["lang"] == "es"
     return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · {DATOS['email']}</p>
 <p>{credito(t)}</p>
-<p><a href="{RUTAS_INVIERNO[t['lang']]}">{INVIERNO[t['lang']]['nav']}</a> · <a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
+<p><a href="{RUTAS_INVIERNO[t['lang']]}">{INVIERNO[t['lang']]['nav']}</a> · <a href="{RUTAS_LEGAL['aviso'][t['lang']]}">{t['foot_leg']}</a> · <a href="{RUTAS_LEGAL['priv'][t['lang']]}">{t['foot_pri']}</a> · <a href="{RUTAS_LEGAL['cond'][t['lang']]}">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
 
 
 def script(t):
@@ -478,6 +488,7 @@ def pagina_inicio(t):
 <section id="comodidades"><h2>{e(t['com_h'])}</h2><ul class="ticks grid2">{''.join(f'<li>{e(c)}</li>' for c in t['com'])}</ul><p class="meta">{e(t['com_nota'])}</p></section>
 <section id="fotos"><h2>{e(t['fotos_h'])}</h2><div class="gal">{fotos}</div></section>
 <section id="disponibilidad"><h2>{e(t['disp_h'])}</h2><div id="cal" class="meta">…</div><p class="meta" id="calnota">{e(t['disp_nota'])}</p></section>
+<section id="invierno"><h2>{e(INVIERNO[t['lang']]['home_h'])}</h2><p>{e(INVIERNO[t['lang']]['home_p'])}</p><p class="meta dtoTxt" hidden></p><p><a class="btn" href="{RUTAS_INVIERNO[t['lang']]}">{e(INVIERNO[t['lang']]['home_btn'])}</a></p></section>
 <section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta dtoTxt" hidden></p><p class="meta">{e(t['tar_nota'])}</p></section>
 <section id="reservar"><h2>{e(t['res_h'])}</h2><p>{e(t['res_p'])}</p>
 <form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><form class="res" id="mailform" hidden><label>{t['ml_nombre']}<input name="nombre" required maxlength="80" autocomplete="name"></label><label>{t['ml_email']}<input name="email" type="email" required maxlength="120" autocomplete="email"></label><label>{t['ml_tel']}<input name="tel" type="tel" maxlength="30" autocomplete="tel"></label>
@@ -511,20 +522,38 @@ def pagina_invierno(t):
     alt = dict(RUTAS_INVIERNO)
     h = cabecera(t, c["title"], c["meta"], "", alt[t["lang"]], alt)
     secs = "".join(f"<h2>{e(tit)}</h2>{lista(items)}" for tit, items in c["secciones"])
+    faq = [t["faq"][i] for i in (1, 3, 7)]   # capacidad, que incluye, aeropuerto (mismas respuestas que la portada)
+    secs += f"<h2>{e(t['faq_h'])}</h2>" + "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in faq)
+    ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}, ensure_ascii=False).replace("</", "<\\/") + "</script>"
     wa = f"https://wa.me/{DATOS['tel_wa']}?text=" + __import__("urllib.parse", fromlist=["quote"]).quote(c["wa"])
     h += f"""<main class="wrap" style="padding-top:36px"><p><a href="{base or ''}/">{e(c['volver'])}</a></p><h1 style="font-size:2.2rem;color:var(--fg)">{e(c['h1'])}</h1>
 <div class="cols"><div>{''.join(f'<p>{e(p)}</p>' for p in c['intro'])}{secs}</div>
 <div class="card"><h3 style="margin-top:0">{e(c['precio_h'])}</h3><p>{e(c['precio'])}</p><p class="dtoTxt" hidden></p><p><a class="btn" href="{base or ''}/#disponibilidad">{e(c['cal'])}</a></p><p><a class="btn" style="background:var(--wa)" href="{wa}" target="_blank" rel="noopener">WhatsApp</a></p></div></div></main>"""
-    h += pie(t) + script(t) + "</body></html>"
+    h += ld + pie(t) + script(t) + "</body></html>"
     return h
 
 
-def legal(titulo, cuerpo, ruta):
+def legal(titulo, cuerpo, ruta, alt=None):
     t = T["es"]
-    alt = {"es": ruta}
+    alt = alt or {"es": ruta}
     h = cabecera(t, f"{titulo} · {DATOS['nombre']}", titulo, "", ruta, alt, legal=True)
     h += f"<main><h1>{e(titulo)}</h1>{cuerpo}</main>" + pie(t) + "</body></html>"
     return h
+
+
+def legal_traducida(lang, doc):
+    titulo, cuerpo = LEGAL[lang][doc]
+    t = T[lang]
+    rep = {"@titular@": DATOS["titular"], "@nif@": DATOS["nif"], "@domicilio@": DATOS["domicilio"], "@email@": DATOS["email"], "@tel@": DATOS["tel_vis"],
+           "@nombre@": DATOS["nombre"], "@registro@": DATOS["registro"], "@fecha@": FECHAS[lang], "@orig@": RUTAS_LEGAL[doc]["es"],
+           "@r_aviso@": RUTAS_LEGAL["aviso"][lang], "@r_priv@": RUTAS_LEGAL["priv"][lang], "@r_cond@": RUTAS_LEGAL["cond"][lang], "@r_tarifas@": RUTAS_INICIO[lang] + "#tarifas"}
+    texto = '<p class="meta">' + NOTA[lang] + "</p>" + cuerpo
+    for k, v in rep.items():
+        texto = texto.replace(k, v)
+    assert "@" not in re.sub(r"[\w.+-]+@[\w.-]+", "", texto), (lang, doc)   # no debe quedar ningun marcador sin rellenar
+    ruta = RUTAS_LEGAL[doc][lang]
+    h = cabecera(t, f"{titulo} · {DATOS['nombre']}", titulo, "", ruta, dict(RUTAS_LEGAL[doc]), legal=True)
+    return h + f"<main><h1>{e(titulo)}</h1>{texto}</main>" + pie(t) + "</body></html>"
 
 
 AVISO = f"""
@@ -556,6 +585,7 @@ PRIVACIDAD = f"""
 <h2>3. Destinatarios</h2>
 <p>No cedemos tus datos a terceros salvo obligación legal (por ejemplo, a las administraciones competentes en materia de registro de viajeros o tributaria). Usamos WhatsApp (Meta) como canal de comunicación si tú nos escribes por ese medio, y el proveedor de alojamiento web para servir esta página, que puede registrar tu dirección IP por motivos técnicos y de seguridad.</p>
 <p>Para las estadísticas de visitas usamos GoatCounter, que no recibe tu correo ni ningún dato que nos facilites por WhatsApp o correo electrónico.</p>
+<p>El calendario de disponibilidad y las tarifas se cargan desde un servicio propio alojado en Cloudflare, que puede registrar tu dirección IP por motivos técnicos y de seguridad; no recibe ningún dato personal tuyo.</p>
 <p>El formulario de solicitud por correo envía tu mensaje a nuestro correo mediante un servicio de Cloudflare (que solo lo transmite y no lo guarda); lo recibimos en nuestro buzón y se conserva en él como cualquier otro correo.</p>
 <h2>4. Conservación</h2>
 <p>Conservamos las conversaciones y los datos de la solicitud el tiempo necesario para atenderla y, si hay reserva, durante los plazos que exijan las normas de registro, fiscales y mercantiles.</p>
@@ -631,9 +661,12 @@ if __name__ == "__main__":
         w(RUTAS_INICIO[_l], pagina_inicio(T[_l]))
         w(RUTAS_APTO[_l], pagina_apto(T[_l]))
         w(RUTAS_INVIERNO[_l], pagina_invierno(T[_l]))
-    w("/aviso-legal-y-exencion-de-responsabilidad/", legal("Aviso legal", AVISO, "/aviso-legal-y-exencion-de-responsabilidad/"))
-    w("/politica-de-privacidad/", legal("Política de privacidad", PRIVACIDAD, "/politica-de-privacidad/"))
-    w("/condiciones/", legal("Condiciones generales de reserva", CONDICIONES, "/condiciones/"))
+    w(RUTAS_LEGAL["aviso"]["es"], legal("Aviso legal", AVISO, RUTAS_LEGAL["aviso"]["es"], dict(RUTAS_LEGAL["aviso"])))
+    w(RUTAS_LEGAL["priv"]["es"], legal("Política de privacidad", PRIVACIDAD, RUTAS_LEGAL["priv"]["es"], dict(RUTAS_LEGAL["priv"])))
+    w(RUTAS_LEGAL["cond"]["es"], legal("Condiciones generales de reserva", CONDICIONES, RUTAS_LEGAL["cond"]["es"], dict(RUTAS_LEGAL["cond"])))
+    for _l in ("en", "de", "fr", "nl"):
+        for _d in ("aviso", "priv", "cond"):
+            w(RUTAS_LEGAL[_d][_l], legal_traducida(_l, _d))
     import shutil
     shutil.copy(os.path.join(AQUI, "datos", "tarifas.json"), os.path.join(SITE, "tarifas.json"))
     dd = os.path.join(AQUI, "datos", "disponibilidad.json")
@@ -653,7 +686,7 @@ if __name__ == "__main__":
             x += f'<xhtml:link rel="alternate" hreflang="x-default" href="{D}{alt["en"]}"/>'
         return x + "</url>"
     legales = ["/aviso-legal-y-exencion-de-responsabilidad/", "/politica-de-privacidad/", "/condiciones/"]
-    entradas = [_entrada(RUTAS_INICIO[l], RUTAS_INICIO) for l, _, _ in LANGS] + [_entrada(RUTAS_APTO[l], RUTAS_APTO) for l, _, _ in LANGS] + [_entrada(RUTAS_INVIERNO[l], RUTAS_INVIERNO) for l, _, _ in LANGS] + [_entrada(u) for u in legales]
+    entradas = [_entrada(RUTAS_INICIO[l], RUTAS_INICIO) for l, _, _ in LANGS] + [_entrada(RUTAS_APTO[l], RUTAS_APTO) for l, _, _ in LANGS] + [_entrada(RUTAS_INVIERNO[l], RUTAS_INVIERNO) for l, _, _ in LANGS] + [_entrada(RUTAS_LEGAL[d][l], RUTAS_LEGAL[d]) for d in RUTAS_LEGAL for l, _, _ in LANGS]
     urls = entradas
     open(os.path.join(SITE, "sitemap.xml"), "w", encoding="utf8").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(entradas) + "</urlset>")
     if GOATCOUNTER:   # el script de estadisticas se sirve desde la propia web

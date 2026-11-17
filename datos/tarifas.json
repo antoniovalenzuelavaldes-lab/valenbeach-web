@@ -31,13 +31,13 @@
   "_excepciones_origen": "Calendario de Pinpoint: solo hay precios definidos del 05/10/2026 al 08/11/2026 (200 EUR/noche, salvo estos dos dias, posiblemente de prueba).",
   "descuentos": [
     {
-      "mas_de": 7,
+      "min_noches": 6,
       "porcentaje": 40,
       "desde": "11-01",
       "hasta": "04-30"
     },
     {
-      "mas_de": 30,
+      "min_noches": 31,
       "porcentaje": 50,
       "desde": "11-01",
       "hasta": "04-30"
