@@ -215,7 +215,7 @@ RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/
 from invierno import INVIERNO, RUTAS_INVIERNO, NEARBY
 for _l, _x in NEARBY.items():
     T[_l]["torrox"] = list(T[_l]["torrox"]) + [_x]
-from invierno_js import JS_TXT
+from invierno_js import JS_TXT, BOOKING
 from legal_i18n import LEGAL, RUTAS_LEGAL, FECHAS, NOTA
 RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
 GOATCOUNTER = "valenbeach"   # cuenta de GoatCounter (estadisticas sin cookies); crearla en goatcounter.com con este codigo
@@ -312,6 +312,8 @@ function estText(a,b){var c=calc(a,b),mn=T&&T.estancia_minima_noches,nn=c?c.n:0;
  if(mn&&nn>0&&nn<mn)return L.min.replace('{n}',mn);
  return c?L.est.replace('{t}',c.t)+(c.p?' '+L.dto.replace('{p}',c.p):''):'';}
 function fmt(s){var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-ev]');if(!a)return;
+ try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:a.getAttribute('data-ev'),title:a.getAttribute('data-ev'),event:true})}catch(x){}});
 var B=window.VB_BASE||'';
 var f=document.getElementById('resform');
 /* Bloqueos y precios editados en el panel de administracion (Worker alquiler-admin, base D1). Si falla, se usan los ficheros estaticos. */
@@ -495,7 +497,8 @@ def pagina_inicio(t):
 <label style="grid-column:1/-1">{t['ml_msg']}<textarea name="mensaje" rows="3" maxlength="1500" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);width:100%"></textarea></label>
 <input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
 <p class="meta" style="grid-column:1/-1;margin:0">{t['ml_priv']}</p></form>
-<p class="meta" id="mailfb" role="status" hidden></p><p class="meta">{t['mail_nota']} {DATOS['email']}</p></section></main>
+<p class="meta" id="mailfb" role="status" hidden></p><p class="meta">{t['mail_nota']} {DATOS['email']}</p>
+<p class="bk"><b>{e(BOOKING[t['lang']]['texto'])}</b> <a class="btn" style="background:var(--acc2)" href="{BOOKING[t['lang']]['url']}" target="_blank" rel="noopener" data-ev="reserva-booking">{e(BOOKING[t['lang']]['boton'])}</a></p></section></main>
 <div class="band"><div class="wrap cita"><img src="/img/antonio.jpg" alt="{e(DATOS['titular'])}" width="96" height="96"><div><p>{e(t['cita'])}</p><small>{e(t['cita_a'])}</small></div></div></div>
 <main class="wrap"><section id="donde"><h2>{e(t['donde_h'])}</h2><div class="cols"><div><p>{e(t['donde'])}</p><p><a class="btn" style="background:var(--acc)" href="https://www.google.com/maps/search/?api=1&amp;query=Carretera+de+Almer%C3%ADa+23b%2C+29770+Torrox" target="_blank" rel="noopener">{e(t['mapa'])}</a></p><h3>{e(t['torrox_h'])}</h3>{''.join(f'<p>{e(p)}</p>' for p in t['torrox'])}</div><img src="/img/atardecer.jpg" alt="" loading="lazy" style="border-radius:12px"></div></section>
 <section><h2>{e(t['res_hh'])}</h2><div class="rev">{ops}</div><p class="meta">{e(t['res_src'])}</p></section>
@@ -528,7 +531,7 @@ def pagina_invierno(t):
     wa = f"https://wa.me/{DATOS['tel_wa']}?text=" + __import__("urllib.parse", fromlist=["quote"]).quote(c["wa"])
     h += f"""<main class="wrap" style="padding-top:36px"><p><a href="{base or ''}/">{e(c['volver'])}</a></p><h1 style="font-size:2.2rem;color:var(--fg)">{e(c['h1'])}</h1>
 <div class="cols"><div>{''.join(f'<p>{e(p)}</p>' for p in c['intro'])}{secs}</div>
-<div class="card"><h3 style="margin-top:0">{e(c['precio_h'])}</h3><p>{e(c['precio'])}</p><p class="dtoTxt" hidden></p><p><a class="btn" href="{base or ''}/#disponibilidad">{e(c['cal'])}</a></p><p><a class="btn" style="background:var(--wa)" href="{wa}" target="_blank" rel="noopener">WhatsApp</a></p></div></div></main>"""
+<div class="card"><h3 style="margin-top:0">{e(c['precio_h'])}</h3><p>{e(c['precio'])}</p><p class="dtoTxt" hidden></p><p><a class="btn" href="{base or ''}/#disponibilidad">{e(c['cal'])}</a></p><p><a class="btn" style="background:var(--wa)" href="{wa}" target="_blank" rel="noopener">WhatsApp</a></p><p><b>{e(BOOKING[t['lang']]['texto'])}</b><br><a class="btn" style="background:var(--acc2)" href="{BOOKING[t['lang']]['url']}" target="_blank" rel="noopener" data-ev="reserva-booking">{e(BOOKING[t['lang']]['boton'])}</a></p></div></div></main>"""
     h += ld + pie(t) + script(t) + "</body></html>"
     return h
 

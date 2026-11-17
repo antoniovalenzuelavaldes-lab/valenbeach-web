@@ -45,3 +45,14 @@ JS_TXT = {
            "dtoLinea": "Vanaf {n} nachten: {p} % korting (van {a} tot {b}).",
            "dtoAviso": "Profiteer van onze kortingen: vanaf {n} nachten krijgt u {p} % korting."},
 }
+
+
+# Enlace directo al anuncio en Booking (sin parametros de seguimiento). El sufijo de idioma de la URL es el que usa Booking.
+_BK = "https://www.booking.com/hotel/es/espectacular-apartamento-en-primera-linea-de-playa-torrox"
+BOOKING = {
+    "es": {"url": _BK + ".es.html", "texto": "¿Prefieres reservar en Booking? No hay problema.", "boton": "Ver el apartamento en Booking"},
+    "en": {"url": _BK + ".en-gb.html", "texto": "Prefer to book on Booking.com? No problem.", "boton": "See the apartment on Booking.com"},
+    "de": {"url": _BK + ".de.html", "texto": "Möchten Sie lieber über Booking.com buchen? Kein Problem.", "boton": "Unterkunft auf Booking.com ansehen"},
+    "fr": {"url": _BK + ".fr.html", "texto": "Vous préférez réserver sur Booking.com ? Pas de problème.", "boton": "Voir l'appartement sur Booking.com"},
+    "nl": {"url": _BK + ".nl.html", "texto": "Liever boeken via Booking.com? Geen probleem.", "boton": "Bekijk het appartement op Booking.com"},
+}
