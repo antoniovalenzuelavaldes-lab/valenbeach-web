@@ -212,6 +212,8 @@ for _k, _v in FORM.items():
 WORKER_URL = "https://valenbeach-reserva.antonio-valenzuela-valdes.workers.dev"
 LANGS = [("es", "Español", "ES"), ("en", "English", "EN"), ("de", "Deutsch", "DE"), ("fr", "Français", "FR"), ("nl", "Nederlands", "NL")]
 RUTAS_INICIO = {"es": "/", "en": "/en/", "de": "/de/", "fr": "/fr/", "nl": "/nl/"}
+from invierno import INVIERNO, RUTAS_INVIERNO
+from invierno_js import JS_TXT
 RUTAS_APTO = {l: (("" if l == "es" else "/" + l) + "/el-apartamento/") for l, _, _ in LANGS}
 GOATCOUNTER = "valenbeach"   # cuenta de GoatCounter (estadisticas sin cookies); crearla en goatcounter.com con este codigo
 
@@ -269,6 +271,7 @@ form.res input{font:inherit;padding:10px;border:1px solid var(--line);border-rad
 .dias span{padding:5px 0;border-radius:4px}.dias .h{color:var(--mut);font-size:.72rem}
 .dias .l{background:color-mix(in srgb,var(--wa) 18%,transparent)}.dias .o{background:color-mix(in srgb,#c0392b 28%,transparent);text-decoration:line-through;color:var(--mut)}
 .dias .p{opacity:.35}.dias small{display:block;font-size:.62rem;color:var(--mut);line-height:1}.dias .n{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.dias [data-d]{cursor:pointer}.dias [data-d]:hover{outline:1px solid var(--acc)}.dias .sel{background:var(--acc);color:#fff;text-decoration:none}.dias .sel small{color:#fff}
 footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;font-size:.88rem;color:var(--mut)}
 footer a{color:var(--mut)}
 a{color:var(--acc)}
@@ -287,17 +290,27 @@ function precio(k){if(!T)return null;
  for(var i=0;i<ts.length;i++){var rs=ts[i].rangos||[];for(var j=0;j<rs.length;j++){var r=rs[j];
   if(r[0]<=r[1]?(md>=r[0]&&md<=r[1]):(md>=r[0]||md<=r[1]))return ts[i].precio;}}
  return T.precio_base_noche;}
-function total(a,b){if(!T||!a||!b)return null;var s=new Date(a+'T00:00:00Z'),e=new Date(b+'T00:00:00Z'),t=0;
- if(!(e>s))return null;for(var x=new Date(s);x<e;x.setUTCDate(x.getUTCDate()+1))t+=precio(iso(x));return t;}
+function inPer(k,d){var md=k.slice(5);return d.desde<=d.hasta?(md>=d.desde&&md<=d.hasta):(md>=d.desde||md<=d.hasta);}
+function calc(a,b){if(!T||!a||!b)return null;var s=new Date(a+'T00:00:00Z'),e=new Date(b+'T00:00:00Z');if(!(e>s))return null;
+ var ks=[],i;for(var x=new Date(s);x<e;x.setUTCDate(x.getUTCDate()+1))ks.push(iso(x));
+ var n=ks.length,base=0;for(i=0;i<n;i++)base+=precio(ks[i]);
+ var best={t:base,p:0};
+ (T.descuentos||[]).forEach(function(d){if(n>d.mas_de){var t=0;for(i=0;i<n;i++){var pr=precio(ks[i]);t+=inPer(ks[i],d)?pr*(1-d.porcentaje/100):pr;}t=Math.round(t*100)/100;if(t<best.t)best={t:t,p:d.porcentaje};}});
+ return {t:best.t,p:best.p,n:n};}
+function total(a,b){var c=calc(a,b);return c?c.t:null;}
 function fmt(s){var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 var B=window.VB_BASE||'';
 var f=document.getElementById('resform');
 /* Bloqueos y precios editados en el panel de administracion (Worker alquiler-admin, base D1). Si falla, se usan los ficheros estaticos. */
 var pS=fetch('https://alquiler-admin.antonio-valenzuela-valdes.workers.dev/pub/valenbeach',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
 var pT=pS.then(function(s){if(s&&s.tarifas&&s.tarifas.precio_base_noche!=null)return s.tarifas;return fetch(B+'/tarifas.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});});
+(function(){var els=document.querySelectorAll('.dtoTxt');if(!els.length)return;pT.then(function(t){var ds=(t&&t.descuentos)||[];if(!ds.length)return;
+ var fm=function(md){var q=md.split('-');return q[1]+'/'+q[0];};
+ var txt=ds.map(function(d){return L.dtoLinea.replace('{n}',d.mas_de).replace('{p}',d.porcentaje).replace('{a}',fm(d.desde)).replace('{b}',fm(d.hasta));}).join(' ');
+ els.forEach(function(el){el.textContent=txt;el.hidden=false;});});})();
 if(f){var est=document.getElementById('estimado');
  pT.then(function(t){T=t;});
- function act(){var t=total(f.a.value,f.b.value),mn=T&&T.estancia_minima_noches,nn=0;if(f.a.value&&f.b.value)nn=Math.round((new Date(f.b.value)-new Date(f.a.value))/864e5);if(est)est.textContent=(mn&&nn>0&&nn<mn)?L.min.replace('{n}',mn):(t==null?'':L.est.replace('{t}',t));}
+ function act(){var c=calc(f.a.value,f.b.value),t=c?c.t:null,mn=T&&T.estancia_minima_noches,nn=0;if(f.a.value&&f.b.value)nn=Math.round((new Date(f.b.value)-new Date(f.a.value))/864e5);if(est)est.textContent=(mn&&nn>0&&nn<mn)?L.min.replace('{n}',mn):(t==null?'':L.est.replace('{t}',t)+(c&&c.p?' '+L.dto.replace('{p}',c.p):''));}
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
  function mensaje(){var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
   if(t!=null)m+=L.estmsg.replace('{t}',t);return m;}
@@ -341,8 +354,25 @@ if(cal){
   var dm=new Date(Date.UTC(m.getUTCFullYear(),m.getUTCMonth()+1,0)).getUTCDate();
   for(var dd=1;dd<=dm;dd++){var dt=new Date(Date.UTC(m.getUTCFullYear(),m.getUTCMonth(),dd)),key=iso(dt);
    var c=dt<hoy?'p':(hay?(oc[key]?'o':'l'):'n'),p=precio(key);
-   g.insertAdjacentHTML('beforeend','<span class="'+c+'" title="'+(c=='o'?L.oc:'')+'">'+dd+(p!=null&&c!='p'&&c!='o'?'<small>'+p+'€</small>':'')+'</span>');}
+   g.insertAdjacentHTML('beforeend','<span class="'+c+'"'+(c!='p'?' data-d="'+key+'" tabindex="0" role="button"':'')+' title="'+(c=='o'?L.oc:'')+'">'+dd+(p!=null&&c!='p'&&c!='o'?'<small>'+p+'€</small>':'')+'</span>');}
   box.appendChild(g);cal.appendChild(box);}
+ var hint=document.getElementById('calhint');if(!hint){hint=document.createElement('p');hint.id='calhint';hint.className='meta';hint.setAttribute('role','status');cal.parentNode.insertBefore(hint,cal);}
+ hint.textContent=L.hint0;
+ var sel={a:null,b:null};
+ function pinta(){cal.querySelectorAll('[data-d]').forEach(function(el){var k=el.getAttribute('data-d');el.classList.toggle('sel',!!(sel.a&&((!sel.b&&k===sel.a)||(sel.b&&k>=sel.a&&k<=sel.b))));});}
+ function libre(a,b){for(var x=new Date(a+'T00:00:00Z'),e=new Date(b+'T00:00:00Z');x<e;x.setUTCDate(x.getUTCDate()+1))if(oc[iso(x)])return false;return true;}
+ function elegir(k){
+  if(!sel.a||sel.b||k<=sel.a){
+   if(oc[k]){hint.textContent=L.ocup;return;}
+   sel={a:k,b:null};hint.textContent=L.hint1.replace('{a}',fmt(k));pinta();return;}
+  if(!libre(sel.a,k)){sel={a:null,b:null};hint.textContent=L.ocup;pinta();return;}
+  sel.b=k;pinta();
+  var n=Math.round((new Date(k)-new Date(sel.a))/864e5);
+  hint.textContent=L.hint2.replace('{a}',fmt(sel.a)).replace('{b}',fmt(k)).replace('{n}',n);
+  if(f){f.a.value=sel.a;f.b.value=k;f.a.dispatchEvent(new Event('change'));f.b.dispatchEvent(new Event('change'));
+   var r=document.getElementById('reservar');if(r&&r.scrollIntoView)r.scrollIntoView({behavior:'smooth',block:'start'});}}
+ cal.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-d]');if(el)elegir(el.getAttribute('data-d'));});
+ cal.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var el=e.target.closest&&e.target.closest('[data-d]');if(el){e.preventDefault();elegir(el.getAttribute('data-d'));}});
  });}
 })();
 """
@@ -394,12 +424,13 @@ def pie(t):
     es = t["lang"] == "es"
     return f"""<footer><div class="wrap"><p>{e(DATOS['nombre'])} · {t['foot_tit']}: {e(DATOS['titular'])} · NIF {DATOS['nif']} · {t['foot_reg']}: {DATOS['registro']}<br>{e(DATOS['domicilio'])} · {DATOS['email']}</p>
 <p>{credito(t)}</p>
-<p><a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
+<p><a href="{RUTAS_INVIERNO[t['lang']]}">{INVIERNO[t['lang']]['nav']}</a> · <a href="/aviso-legal-y-exencion-de-responsabilidad/">{t['foot_leg']}</a> · <a href="/politica-de-privacidad/">{t['foot_pri']}</a> · <a href="/condiciones/">{t['foot_con']}</a></p></div></footer>{estadisticas()}"""
 
 
 def script(t):
     v = {"msg": t["wa_msg"], "msgf": t["wa_msg_f"], "tel": DATOS["tel_wa"], "meses": t["meses"], "dias": t["dias"],
          "oc": t["ocupado"], "li": t["libre"], "sin": t["disp_sin"], "mail": DATOS["email"], "subj": t["subj"], "est": t["est"], "estmsg": t["estmsg"], "mfb": t["mfb"], "worker": WORKER_URL, "ml_falta": t["ml_falta"], "ml_sending": t["ml_sending"], "ml_send": t["ml_send"], "ml_ok": t["ml_ok"], "ml_err": t["ml_err"], "solo": t["solo"], "min": t["min"]}
+    v.update(JS_TXT[t["lang"]])
     return "<script>window.VB_BASE=" + json.dumps(BASE) + ";window.VB=" + json.dumps(v, ensure_ascii=False) + ";" + JS + "</script>"
 
 
@@ -433,7 +464,7 @@ def pagina_inicio(t):
 <section id="comodidades"><h2>{e(t['com_h'])}</h2><ul class="ticks grid2">{''.join(f'<li>{e(c)}</li>' for c in t['com'])}</ul><p class="meta">{e(t['com_nota'])}</p></section>
 <section id="fotos"><h2>{e(t['fotos_h'])}</h2><div class="gal">{fotos}</div></section>
 <section id="disponibilidad"><h2>{e(t['disp_h'])}</h2><div id="cal" class="meta">…</div><p class="meta" id="calnota">{e(t['disp_nota'])}</p></section>
-<section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta">{e(t['tar_nota'])}</p></section>
+<section id="tarifas"><h2>{e(t['tar_h'])}</h2><div class="tarifas">{tar}</div><p class="meta dtoTxt" hidden></p><p class="meta">{e(t['tar_nota'])}</p></section>
 <section id="reservar"><h2>{e(t['res_h'])}</h2><p>{e(t['res_p'])}</p>
 <form class="res" id="resform"><label>{t['f_in']}<input type="date" name="a"></label><label>{t['f_out']}<input type="date" name="b"></label><label>{t['f_pers']}<input type="number" name="n" min="1" max="10" value="2"></label><button class="btn" type="submit">{t['f_btn']}</button><button class="btn" type="button" id="mailbtn" style="background:var(--acc)">{t['f_mail']}</button></form><p class="meta" id="estimado"></p><form class="res" id="mailform" hidden><label>{t['ml_nombre']}<input name="nombre" required maxlength="80" autocomplete="name"></label><label>{t['ml_email']}<input name="email" type="email" required maxlength="120" autocomplete="email"></label><label>{t['ml_tel']}<input name="tel" type="tel" maxlength="30" autocomplete="tel"></label>
 <label style="grid-column:1/-1">{t['ml_msg']}<textarea name="mensaje" rows="3" maxlength="1500" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);width:100%"></textarea></label>
@@ -457,6 +488,20 @@ def pagina_apto(t):
     fotos = "".join(f'<figure><img src="/img/{f}" alt="{e(c)}" loading="lazy" width="1600" height="1200"><figcaption>{e(c)}</figcaption></figure>' for f, c in t["fotos"])
     h += f"""<main class="wrap" style="padding-top:36px"><p><a href="{base or ''}/">{t['volver']}</a></p><h1 style="font-size:2.4rem;color:var(--fg)">{e(t['ap_h'])}</h1><div class="cols"><div>{items}</div><div class="card"><h3 style="margin-top:0">{e(t['tar_h'])}</h3>{''.join(f'<p style="margin:.3em 0"><b>{e(a)}</b>: {e(b)}</p>' for a, b in t['tar'])}<p class="meta">{e(t['tar_nota'])}</p><p><a class="btn" href="https://wa.me/{DATOS['tel_wa']}?text={__import__('urllib.parse', fromlist=['quote']).quote(t['wa_msg'])}" target="_blank" rel="noopener">{e(t['cta'])}</a></p></div></div><section><div class="gal">{fotos}</div></section></main>"""
     h += pie(t) + "</body></html>"
+    return h
+
+
+def pagina_invierno(t):
+    c = INVIERNO[t["lang"]]
+    base = t["base"]
+    alt = dict(RUTAS_INVIERNO)
+    h = cabecera(t, c["title"], c["meta"], "", alt[t["lang"]], alt)
+    secs = "".join(f"<h2>{e(tit)}</h2>{lista(items)}" for tit, items in c["secciones"])
+    wa = f"https://wa.me/{DATOS['tel_wa']}?text=" + __import__("urllib.parse", fromlist=["quote"]).quote(c["wa"])
+    h += f"""<main class="wrap" style="padding-top:36px"><p><a href="{base or ''}/">{e(c['volver'])}</a></p><h1 style="font-size:2.2rem;color:var(--fg)">{e(c['h1'])}</h1>
+<div class="cols"><div>{''.join(f'<p>{e(p)}</p>' for p in c['intro'])}{secs}</div>
+<div class="card"><h3 style="margin-top:0">{e(c['precio_h'])}</h3><p>{e(c['precio'])}</p><p class="dtoTxt" hidden></p><p><a class="btn" href="{base or ''}/#disponibilidad">{e(c['cal'])}</a></p><p><a class="btn" style="background:var(--wa)" href="{wa}" target="_blank" rel="noopener">WhatsApp</a></p></div></div></main>"""
+    h += pie(t) + script(t) + "</body></html>"
     return h
 
 
@@ -571,6 +616,7 @@ if __name__ == "__main__":
     for _l, _, _ in LANGS:
         w(RUTAS_INICIO[_l], pagina_inicio(T[_l]))
         w(RUTAS_APTO[_l], pagina_apto(T[_l]))
+        w(RUTAS_INVIERNO[_l], pagina_invierno(T[_l]))
     w("/aviso-legal-y-exencion-de-responsabilidad/", legal("Aviso legal", AVISO, "/aviso-legal-y-exencion-de-responsabilidad/"))
     w("/politica-de-privacidad/", legal("Política de privacidad", PRIVACIDAD, "/politica-de-privacidad/"))
     w("/condiciones/", legal("Condiciones generales de reserva", CONDICIONES, "/condiciones/"))
@@ -593,7 +639,7 @@ if __name__ == "__main__":
             x += f'<xhtml:link rel="alternate" hreflang="x-default" href="{D}{alt["en"]}"/>'
         return x + "</url>"
     legales = ["/aviso-legal-y-exencion-de-responsabilidad/", "/politica-de-privacidad/", "/condiciones/"]
-    entradas = [_entrada(RUTAS_INICIO[l], RUTAS_INICIO) for l, _, _ in LANGS] + [_entrada(RUTAS_APTO[l], RUTAS_APTO) for l, _, _ in LANGS] + [_entrada(u) for u in legales]
+    entradas = [_entrada(RUTAS_INICIO[l], RUTAS_INICIO) for l, _, _ in LANGS] + [_entrada(RUTAS_APTO[l], RUTAS_APTO) for l, _, _ in LANGS] + [_entrada(RUTAS_INVIERNO[l], RUTAS_INVIERNO) for l, _, _ in LANGS] + [_entrada(u) for u in legales]
     urls = entradas
     open(os.path.join(SITE, "sitemap.xml"), "w", encoding="utf8").write('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(entradas) + "</urlset>")
     if GOATCOUNTER:   # el script de estadisticas se sirve desde la propia web
