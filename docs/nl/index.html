@@ -151,13 +151,15 @@ if(f){var est=document.getElementById('estimado');
 var cal=document.getElementById('cal');
 if(cal){
  Promise.all([fetch(B+'/disponibilidad.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}),pT,pS]).then(function(rs){
- var d=rs[0];T=rs[1];var man=rs[2]&&Array.isArray(rs[2].ocupado)?rs[2].ocupado:[];
- if(d&&d.actualizado&&Array.isArray(d.ocupado))d={actualizado:d.actualizado,ocupado:d.ocupado.concat(man)};var hay=d&&d.actualizado&&Array.isArray(d.ocupado),oc={};
+ var d=rs[0];T=rs[1];var man=rs[2]&&Array.isArray(rs[2].ocupado)?rs[2].ocupado:[],abi=rs[2]&&Array.isArray(rs[2].abierto)?rs[2].abierto:[];
+ var hay=d&&d.actualizado&&Array.isArray(d.ocupado),oc={};
  var nn=document.getElementById('calnota');
  if(!hay&&!T){cal.textContent=L.sin;if(nn)nn.hidden=true;return;}
  if(!hay){if(nn)nn.textContent=L.solo;}
- if(hay)d.ocupado.forEach(function(r){var s=new Date(r[0]+'T00:00:00Z'),e=new Date(r[1]+'T00:00:00Z');
-  for(var x=new Date(s);x<e;x.setUTCDate(x.getUTCDate()+1))oc[iso(x)]=1;});
+ function rango(r,f){for(var x=new Date(r[0]+'T00:00:00Z'),e=new Date(r[1]+'T00:00:00Z');x<e;x.setUTCDate(x.getUTCDate()+1))f(iso(x));}
+ if(hay){d.ocupado.forEach(function(r){rango(r,function(k){oc[k]=1;});});   /* 1) fechas ocupadas segun Booking */
+  abi.forEach(function(r){rango(r,function(k){delete oc[k];});});          /* 2) las que el titular abre ganan a Booking */
+  man.forEach(function(r){rango(r,function(k){oc[k]=1;});});}              /* 3) los bloqueos manuales ganan a las aperturas */
  var hoy=new Date();hoy=new Date(Date.UTC(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()));
  cal.innerHTML='';cal.className='cal';
  for(var i=0;i<12;i++){var m=new Date(Date.UTC(hoy.getUTCFullYear(),hoy.getUTCMonth()+i,1));
