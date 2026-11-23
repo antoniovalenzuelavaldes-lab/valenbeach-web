@@ -95,8 +95,11 @@ function estText(a,b){var c=calc(a,b),mn=T&&T.estancia_minima_noches,nn=c?c.n:0;
  if(mn&&nn>0&&nn<mn)return L.min.replace('{n}',mn);
  return c?L.est.replace('{t}',c.t)+(c.p?' '+L.dto.replace('{p}',c.p):''):'';}
 function fmt(s){var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+var REF='';try{REF=(new URLSearchParams(location.search).get('ref')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,24)}catch(x){}
+function evn(n){return REF?n+'-'+REF:n}
+if(REF){try{document.querySelectorAll('a[href^="/"]').forEach(function(a){var h=a.getAttribute('href');if(h.indexOf('//')===0||h.indexOf('ref=')>-1||h.indexOf('.')>-1&&h.split('#')[0].split('/').pop().indexOf('.')>-1)return;var i=h.indexOf('#'),b=i<0?h:h.slice(0,i),r=i<0?'':h.slice(i);a.setAttribute('href',b+(b.indexOf('?')<0?'?':'&')+'ref='+REF+r)})}catch(x){}}
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-ev]');if(!a)return;
- try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:a.getAttribute('data-ev'),title:a.getAttribute('data-ev'),event:true})}catch(x){}});
+ try{var n=evn(a.getAttribute('data-ev'));window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:n,title:n,event:true})}catch(x){}});
 var B=window.VB_BASE||'';
 var f=document.getElementById('resform');
 /* Bloqueos y precios editados en el panel de administracion (Worker alquiler-admin, base D1). Si falla, se usan los ficheros estaticos. */
@@ -112,7 +115,7 @@ if(f){var est=document.getElementById('estimado');
  f.a.addEventListener('change',act);f.b.addEventListener('change',act);
  function mensaje(){var a=f.a.value,b=f.b.value,n=f.n.value,m=(a&&b)?L.msgf.replace('{a}',fmt(a)).replace('{b}',fmt(b)).replace('{n}',n||'?'):L.msg,t=total(a,b);
   if(t!=null)m+=L.estmsg.replace('{t}',t);return m;}
- function ev(n){try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:n,title:n,event:true})}catch(x){}}
+ function ev(n){n=evn(n);try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path:n,title:n,event:true})}catch(x){}}
  f.addEventListener('submit',function(e){e.preventDefault();ev('reserva-whatsapp');
   window.open('https://wa.me/'+L.tel+'?text='+encodeURIComponent(mensaje()),'_blank','noopener');});
  var mb=document.getElementById('mailbtn'),mf=document.getElementById('mailform'),fb=document.getElementById('mailfb'),T0=Date.now();
